@@ -25,12 +25,21 @@ def login(driver, targetQQ, account, password):
 
 def getData(driver, db):
     content = driver.find_elements_by_css_selector('.content')
-    stime = driver.find_elements_by_css_selector('.c_tx.c_tx3.goDetail')
-    for con, sti in zip(content, stime):
+    mtime = driver.find_elements_by_css_selector('.c_tx.c_tx3.goDetail')
+    # like = driver.find_element_by_css_selector('.qz_like_btn.c_tx.mr8')
+    try:
+        tail = driver.find_element_by_css_selector('.custom-tail').text
+        tail_exit = True
+    except:
+        tail = "Null"
+        tail_exit = False
+    for con, mti in zip(content, mtime):
         data = {
-            'time': sti.text,
-            'shuos': con.text
+            'time': mti.get_attribute("title"),
+            'Mood': con.text,
+            'tail': tail
         }
+
         db.insert_one(data)
 
 def printData(db):
@@ -68,7 +77,7 @@ def getOneQQ(driver, targetQQ, account, password, targetPage, db):
     if owner_info_exit == True:
         driver.switch_to.frame('app_canvas_frame')
         driver.implicitly_wait(3)
-        page=-1
+        page=0
         try:
             while page<targetPage:
                 page+=1
@@ -91,14 +100,9 @@ def mian():
     conn = pymongo.MongoClient(host='localhost', port=27017)    # set database
     qzone = conn['qzone']
 
-<<<<<<< HEAD
-    targetQQ = '2468'
-    account = '654321'
-=======
-    targetQQ = '123456789'
-    account = '987654321'
->>>>>>> parent of cac3e54... add tail
-    password = '123456789'
+    targetQQ = '1234567'
+    account = '1234567'
+    password = '1234567'
     targetPage = 20
 
     # csv_reader = csv.reader(open(r'C:\Users\Jack\PycharmProjects\Spider\QQmail.csv'))
