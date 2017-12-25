@@ -100,9 +100,9 @@ def mian():
     conn = pymongo.MongoClient(host='localhost', port=27017)    # set database
     qzone = conn['qzone']
 
-    targetQQ = '2366725178'
-    account = '584971982'
-    password = 'lijinhui1997'
+    targetQQ = '2468'
+    account = '654321'
+    password = '123456789'
     targetPage = 20
 
     # csv_reader = csv.reader(open(r'C:\Users\Jack\PycharmProjects\Spider\QQmail.csv'))
