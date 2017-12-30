@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 import pymongo
-import check_legal
+import CheckLegal
 
 def save_as_txt(db, dataPath):
     with open(dataPath, 'w', encoding='utf-8') as f:
@@ -26,7 +26,7 @@ def main():
         strBuffer = str(line)
         string = ""
         for oneWord in strBuffer:
-            if check_legal.is_chinese(oneWord) or check_legal.is_punc(oneWord):
+            if CheckLegal.is_chinese(oneWord) or CheckLegal.is_punc(oneWord):
                 string += oneWord
         fileWrite.write(string)
         fileWrite.write('\n')
