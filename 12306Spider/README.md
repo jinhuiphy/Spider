@@ -2,6 +2,8 @@
 
 用来爬取指定始发站和终点站以及日期所有车次的余票
 
+参考项目：https://github.com/protream/iquery
+
 ---
 使用方法
 ---
@@ -9,9 +11,7 @@
  1. 安装所需的库
 
     `pip install prettytable
-
      pip install docopt
-
      pip install requests`
 
  2. 获取车站代码对应表
