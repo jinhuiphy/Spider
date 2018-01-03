@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 
 """
-	查询火车票余票工具
+    查询火车票余票工具
 
 Usage:
     tickets.py [-h] <from> <to> <date>
