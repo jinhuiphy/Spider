@@ -7,16 +7,24 @@
 ---
 
  1. 安装所需的库
+
     `pip install prettytable
+
      pip install docopt
+
      pip install requests`
+
  2. 获取车站代码对应表
+
     `python getStations.py > stations.py`
+
     然后在字典前面加上`stations = `
+    ![](https://github.com/jinhuiphy/Spider/blob/master/12306Spider/pictures/stations.png)
 
  3. 运行getTickets.py即可
     格式如下： 
     `python getTickets.py 上海 南昌 2018-01-09`
+    ![](https://github.com/jinhuiphy/Spider/blob/master/12306Spider/pictures/tickets.png)
 
 
 
