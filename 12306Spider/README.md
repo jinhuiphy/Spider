@@ -10,9 +10,7 @@
 
  1. 安装所需的库
 
-    `pip install prettytable
-     pip install docopt
-     pip install requests`
+    `pip install prettytable docopt requests`
 
  2. 获取车站代码对应表
 
