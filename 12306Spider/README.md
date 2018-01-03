@@ -2,9 +2,11 @@
 
 用来爬取指定始发站和终点站以及日期所有车次的余票
 
-参考项目：https://github.com/protream/iquery
+参考项目：
 
-        https://github.com/lvhaidong/TrainTicket
+https://github.com/protream/iquery
+
+https://github.com/lvhaidong/TrainTicket
 
 ---
 使用方法
