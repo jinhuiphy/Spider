@@ -23,7 +23,7 @@
  3. 运行getTickets.py即可
 
     格式如下： 
-    `python getTickets.py 上海 南昌 2018-01-09`
+    `python getTickets.py <from_station> <to_sation> <year-month-day>`
 
     ![](https://github.com/jinhuiphy/Spider/blob/master/12306Spider/pictures/tickets.png)
 
