@@ -8,7 +8,9 @@
 
  1. 安装所需的库
     `pip install prettytable
+    
      pip install docopt
+     
      pip install requests`
  2. 获取车站代码对应表
     `python getStations.py > stations.py`
