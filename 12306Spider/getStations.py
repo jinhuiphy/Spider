@@ -23,6 +23,6 @@ stations = re.findall(u'([\u4e00-\u9fa5]+)\|([A-Z]+)', text)
 stations = dict(stations)
 
 # 将字典中的key,value进行倒转
-stations = dict(zip(stations.values(), stations.keys()))
+# stations = dict(zip(stations.values(), stations.keys()))
 pprint(stations, indent = 4)
 # 将输出的结果重定向到stations.py文件中
