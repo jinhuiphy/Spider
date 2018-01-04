@@ -13,9 +13,7 @@ import random
 import time as systime
 
 class Weibo:
-    
-    # 将Your Cookies替换成自己的cookie
-    cookie = {"Cookie": "Your Cookies"}  
+    cookie = {"Cookie": "Your Cookies"}  # 将Your Cookies替换成自己的cookie
 
     # Weibo类初始化
     def __init__(self, user_id, filter=0):
@@ -161,10 +159,6 @@ class Weibo:
                         weibo_id=str(id_info[i])[2:]
                         self.weibo_id.append(weibo_id)
 
-                        # 将微博ID和发布时间保存为txt，便于后面爬取评论
-                        f = open('id.txt', 'w')     # 追加写入则将w改成a
-                        f.write(weibo_id+' '+publish_time+'\n')
-
                         # 点赞数
                         str_zan = info[i].xpath("div/a/text()")[-4]
                         guid = re.findall(pattern, str_zan, re.M)
@@ -217,15 +211,13 @@ class Weibo:
                       u"\n微博数：" + str(self.weibo_num) +
                       u"\n关注数：" + str(self.following) +
                       u"\n粉丝数：" + str(self.followers) +
-                      result_header
-                      )
+                      result_header)
             for i in range(1, self.weibo_num2 + 1):
                 text = (str(i) + ":" + self.weibo_content[i - 1] + "\n" +
                         u"发布时间：" + self.publish_time[i - 1] + "\n" +
                         u"点赞数：" + str(self.up_num[i - 1]) +
                         u"	 转发数：" + str(self.retweet_num[i - 1]) +
-                        u"	 评论数：" + str(self.comment_num[i - 1]) + "\n\n"
-                        )
+                        u"	 评论数：" + str(self.comment_num[i - 1]) + "\n\n")
                 result = result + text
             file_dir = os.path.split(os.path.realpath(__file__))[
                 0] + os.sep + "weibo"
@@ -261,8 +253,11 @@ class Weibo:
             }
             self.WeiboData.insert_one(user_info)
 
-            # 保存微博信息
+            # 保存微博信息,并将微博ID和发布时间保存为txt，便于后面爬取评论
+            f = open('id.txt', 'w')     # 追加写入则将w改成a
             for i in range(self.weibo_num2):
+                f.write(self.weibo_id[i]+'  '+self.publish_time[i]+'\n')
+
                 data = {
                     '微博ID':self.weibo_id[i],
                     '内容':self.weibo_content[i],
@@ -271,6 +266,7 @@ class Weibo:
                     '转发数':self.retweet_num[i],
                     '评论数':self.comment_num[i]
                 }
+
                 self.WeiboData.insert_one(data)
             print("%s条微博保存完毕" %self.weibo_num2)
 
