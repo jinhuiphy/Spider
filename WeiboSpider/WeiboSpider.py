@@ -14,7 +14,6 @@ import time as systime
 
 class Weibo:
     cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
-  # 将your cookie替换成自己的cookie
 
     # Weibo类初始化
     def __init__(self, user_id, filter=0):
@@ -36,10 +35,10 @@ class Weibo:
         else:
             self.flag = "所有微博内容"
 
-        # 建立数据库
+        # 建立微博数据库
         dbClient = pymongo.MongoClient(host='localhost', port=27017)
         Weibo = dbClient['Weibo']
-        self.WeiboData = Weibo[str(user_id)]
+        self.WeiboData = Weibo[str(user_id) + str(user_id)]
         if self.WeiboData.find():
             self.WeiboData.remove({})
 
@@ -106,14 +105,14 @@ class Weibo:
             pattern = r"\d+\.?\d*"
             for page in range(1, page_num + 1):
 
-                print("正在爬取%s/%s页" %(page,page_num))
+                print("正在爬取%s/%s页微博" % (page, page_num))
 
                 url2 = "https://weibo.cn/u/%d?filter=%d&page=%d" % (
                     self.user_id, self.filter, page)
                 html2 = requests.get(url2, cookies=self.cookie).content
                 selector2 = etree.HTML(html2)
                 info = selector2.xpath("//div[@class='c']")
-                wenben_id=selector2.xpath("//div/@id")
+                id_info =selector2.xpath("//div/@id")
                 if len(info) > 3:
                     for i in range(0, len(info) - 2):
                         # 微博内容
@@ -154,17 +153,19 @@ class Weibo:
                             publish_time = publish_time[:16]
                         self.publish_time.append(publish_time)
                         # print (u"微博发布时间：" + publish_time)
-                        str_id=str(wenben_id[i])
 
+                        # 将微博的代号存储起来
+                        str_id=str(id_info[i])
                         f = open('id.txt', 'a')
                         f.write(str_id[2:]+' '+publish_time+'\n')
+
                         # 点赞数
                         str_zan = info[i].xpath("div/a/text()")[-4]
                         guid = re.findall(pattern, str_zan, re.M)
                         try:
                             up_num = int(guid[0])
                         except Exception as e:
-                            print ("第%s条微博点赞Error: %s" %(self.weibo_num2, e))
+                            print ("第%s条微博点赞数Error: %s" %(self.weibo_num2, e))
                             up_num = 0
                         self.up_num.append(up_num)
                         # print (u"点赞数: " + str(up_num))
@@ -175,7 +176,7 @@ class Weibo:
                             guid = re.findall(pattern, retweet, re.M)
                             retweet_num = int(guid[0])
                         except Exception as e:
-                            print ("第%s条微博转发Error: %s" %(self.weibo_num2, e))
+                            print ("第%s条微博转发数Error: %s" %(self.weibo_num2, e))
                             retweet_num = 0
                         self.retweet_num.append(retweet_num)
                         # print (u"转发数: " + str(retweet_num))
@@ -186,7 +187,7 @@ class Weibo:
                         try:
                             comment_num = int(guid[0])
                         except Exception as e:
-                            print ("第%s条微博评论Error: %s" %(self.weibo_num2, e))
+                            print ("第%s条微博评论数Error: %s" %(self.weibo_num2, e))
                             comment_num = 0
                         self.comment_num.append(comment_num)
                         # print (u"评论数: " + str(comment_num))
@@ -233,8 +234,8 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
-    # 将爬取的信息保存到数据库
-    def save_db(self):
+    # 将爬取的微博保存到数据库
+    def save_weibo_db(self):
         try:
             print("正在保存微博数据")
             if self.filter:
@@ -275,6 +276,8 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
+    # 将爬取到的评论保存到数据库
+
     # 运行爬虫
     def start(self):
         try:
@@ -282,7 +285,7 @@ class Weibo:
             self.get_user_info()
             self.get_weibo_info()
             # self.write_txt()
-            self.save_db()
+            # self.save_db()
             print (u"信息抓取完毕")
             # print ("===========================================================================")
         except Exception as e:
