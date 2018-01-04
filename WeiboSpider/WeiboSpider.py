@@ -13,7 +13,9 @@ import random
 import time as systime
 
 class Weibo:
-    cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
+    
+    # 将Your Cookies替换成自己的cookie
+    cookie = {"Cookie": "Your Cookies"}  
 
     # Weibo类初始化
     def __init__(self, user_id, filter=0):
@@ -29,6 +31,7 @@ class Weibo:
         self.up_num = []  # 微博对应的点赞数
         self.retweet_num = []  # 微博对应的转发数
         self.comment_num = []  # 微博对应的评论数
+        self.weibo_id = []
 
         if self.filter:
             self.flag = "原创微博内容"
@@ -38,7 +41,7 @@ class Weibo:
         # 建立微博数据库
         dbClient = pymongo.MongoClient(host='localhost', port=27017)
         Weibo = dbClient['Weibo']
-        self.WeiboData = Weibo[str(user_id) + str(user_id)]
+        self.WeiboData = Weibo[str(user_id)]
         if self.WeiboData.find():
             self.WeiboData.remove({})
 
@@ -46,7 +49,7 @@ class Weibo:
     def get_username(self):
         try:
             url = "https://weibo.cn/%d/info" % (self.user_id)
-            html = requests.get(url, cookies=self.cookie).content
+            html = requests.get(url, cookies = self.cookie).content
             selector = etree.HTML(html)
             username = selector.xpath("//title/text()")[0]
             self.username = username[:-3]
@@ -69,9 +72,9 @@ class Weibo:
                 "//div[@class='tip2']/span[@class='tc']/text()")[0]
             guid = re.findall(pattern, str_wb, re.S | re.M)
             for value in guid:
-                num_wb = int(value)
+                wb_num = int(value)
                 break
-            self.weibo_num = num_wb
+            self.weibo_num = wb_num
             print (u"微博数: " + str(self.weibo_num))
 
             # 关注数
@@ -154,10 +157,13 @@ class Weibo:
                         self.publish_time.append(publish_time)
                         # print (u"微博发布时间：" + publish_time)
 
-                        # 将微博的代号存储起来
-                        str_id=str(id_info[i])
-                        f = open('id.txt', 'a')
-                        f.write(str_id[2:]+' '+publish_time+'\n')
+                        # 微博ID，为后面爬取某一条微博的评论做准备
+                        weibo_id=str(id_info[i])[2:]
+                        self.weibo_id.append(weibo_id)
+
+                        # 将微博ID和发布时间保存为txt，便于后面爬取评论
+                        f = open('id.txt', 'w')     # 追加写入则将w改成a
+                        f.write(weibo_id+' '+publish_time+'\n')
 
                         # 点赞数
                         str_zan = info[i].xpath("div/a/text()")[-4]
@@ -242,6 +248,7 @@ class Weibo:
                 flag = "原创微博内容"
             else:
                 flag = "所有微博内容"
+
             # 保存用户信息
             user_info = {
                 '用户名':self.username,
@@ -253,9 +260,11 @@ class Weibo:
                 '爬取微博类型':flag
             }
             self.WeiboData.insert_one(user_info)
+
             # 保存微博信息
             for i in range(self.weibo_num2):
                 data = {
+                    '微博ID':self.weibo_id[i],
                     '内容':self.weibo_content[i],
                     '发布时间':self.publish_time[i],
                     '点赞数':self.up_num[i],
@@ -269,14 +278,11 @@ class Weibo:
                 print (u"共" + str(self.weibo_num2) + u"条微博")
             else:
                 print (u"共" + str(self.weibo_num) + u"条微博，其中" +
-                       str(self.weibo_num2) + u"条为原创微博"
-                       )
+                       str(self.weibo_num2) + u"条为原创微博")
 
         except Exception as e:
             print ("Error: ", e)
             traceback.print_exc()
-
-    # 将爬取到的评论保存到数据库
 
     # 运行爬虫
     def start(self):
@@ -285,7 +291,7 @@ class Weibo:
             self.get_user_info()
             self.get_weibo_info()
             # self.write_txt()
-            # self.save_db()
+            self.save_weibo_db()
             print (u"信息抓取完毕")
             # print ("===========================================================================")
         except Exception as e:
