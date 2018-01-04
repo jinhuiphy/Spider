@@ -13,11 +13,7 @@ import random
 import time as systime
 
 class Weibo:
-    cookie = {"Cookie": "_T_WM=00dab9533b7fcab9969b54488c0007b9;"
-                        " SUB=_2A253Sdw7DeRhGeNH7FIX-CvNzT-IHXVUteRzrDV6PUJbkdBeLUjVkW1NSpOgtXzOQWn7ZuVWQkeAdyOr-zkU85CW; "
-                        "SUHB=0bt8fR1QeGrxXH; "
-                        "SCF=AoTYxXIQ97QY0k1CNkRjEicPIWzzavue932JWj5nxoV-o6KV6-NAvFJl064DP5-NvxOauzv2RhraTB3p5WqgVc0.;"
-                        " SSOLoginState=1515039851"}  # 将your cookie替换成自己的cookie
+    cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
   # 将your cookie替换成自己的cookie
 
     # Weibo类初始化
