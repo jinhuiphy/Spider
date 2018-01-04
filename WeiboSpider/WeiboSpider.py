@@ -277,8 +277,7 @@ class Weibo:
         try:
             self.get_username()
             self.get_user_info()
-            # self.get_weibo_info()
-            self.get_weibo_comment()
+            self.get_weibo_info()
             # self.write_txt()
             # self.save_db()
             print (u"信息抓取完毕")
