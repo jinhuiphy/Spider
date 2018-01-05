@@ -10,7 +10,7 @@ import random
 import time as systime
 
 class WeiboComment:
-    cookie = {"Cookie": "Your Cookies"}  # 将Your Cookies替换成自己的cookie
+    cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
 
     # WeiboComment类初始化
     def __init__(self, user_id, comment_id, publish_time, filter=0):
@@ -121,10 +121,11 @@ class WeiboComment:
 
                         self.WeiboCommentData.insert_one(data)
                         # print("微博评论：" + _comment)
-
-                systime.sleep(0.3 + float(random.randint(1, 10)) / 40)
+                if (page % 50 ==0):
+                    systime.sleep(5 + float(random.randint(1, 10)) / 20)
+                systime.sleep(0.5 + float(random.randint(1, 10)) / 20)
         except Exception as e:
-            print ("Error: ", e)
+            print ("Error: ", e, " 怕是老哥爬的太快，被封了哟，赶紧提高爬虫姿势水平")
             traceback.print_exc()
 
     def start(self):
@@ -134,16 +135,24 @@ class WeiboComment:
             print ("Error: ", e)
 
 def main():
-    user_id = 3591355593  # 可以改成任意合法的用户id（爬虫的微博id除外）
-    filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
-    publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
-    try:
-        Comment = WeiboComment(user_id, comment_id, publish_time, filter)
-        Comment.start()
-    except Exception as e:
-        print ("Error: ", e)
-        traceback.print_exc()
+    user_id = 5992855888      # 可以改成任意合法的用户id（爬虫的微博id除外）
+    filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
+    # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
+    # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
+    f = open("id.txt", 'r')
+    lines = f.readlines()
+    for line in lines:
+        line = line.strip('\n')
+
+        comment_id, publish_time = line[:9], line[11:27]
+        print(comment_id, publish_time)
+        try:
+            Comment = WeiboComment(user_id, comment_id, publish_time, filter)
+            Comment.start()
+        except Exception as e:
+            print ("Error: ", e)
+            traceback.print_exc()
+        systime.sleep(2 + float(random.randint(1, 10)) / 20)
 
 if __name__ == "__main__":
     main()
