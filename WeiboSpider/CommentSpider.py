@@ -34,7 +34,14 @@ class WeiboComment:
 
             # url = "https://weibo.cn/comment/hot/%s?rl=1&page=1" % (
             #     self.comment_id)     # 热门评论url
-            html = requests.get(url, cookies = self.cookie).content
+            use_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0',
+                          'Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10',
+                          'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'
+                          ]
+            UA = random.choice(use_agents) #随机选取浏览器
+            headers = {'User-Agent': UA}
+            html = requests.get(url, cookies = self.cookie,headers=headers).content 
             selector = etree.HTML(html)
 
             if selector.xpath("//input[@name='mp']") == []:
@@ -142,12 +149,15 @@ def main():
     # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
     f = open("id.txt", 'r')
     lines = f.readlines()
+    i=1
     for line in lines:
         line = line.strip('\n')
 
         comment_id, publish_time = line[:9], line[11:27]
         print(comment_id, publish_time)
         try:
+            if i%20==0:
+                systime.sleep(5) #爬取20页微博停止5s
             Comment = WeiboComment(user_id, comment_id, publish_time, filter)
             Comment.start()
         except Exception as e:
