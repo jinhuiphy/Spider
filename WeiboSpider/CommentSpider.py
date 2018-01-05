@@ -9,12 +9,12 @@ import pymongo
 import random
 import time as systime
 from agent import agents
+from cookies import cookies
 
 class WeiboComment:
-    cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
 
     # WeiboComment类初始化
-    def __init__(self, user_id, comment_id, publish_time, filter=0):
+    def __init__(self, user_id, comment_id, publish_time, cookie, filter=0):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.comment_id = comment_id    # 微博代号
         self.publish_time = publish_time  # 微博发布时间
@@ -29,6 +29,9 @@ class WeiboComment:
         # 随机选取浏览器
         UA = random.choice(agents)
         self.headers = {'User-Agent': UA}
+
+        # 设置cookies
+        self.cookie = cookie
 
     # 获取微博下面的评论
     def get_weibo_comment(self):
@@ -49,7 +52,6 @@ class WeiboComment:
                     "//input[@name='mp']")[0].attrib["value"])
             pattern = r"\d+\.?\d*"
             for page in range(1, page_num+1):
-                print("正在爬取%s/%s页评论" % (page, page_num))
                 url2 = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=%d" % (
                 self.comment_id, self.user_id, page)    # 所有评论url2
 
@@ -61,6 +63,7 @@ class WeiboComment:
 
                 # 判断该页是否有评论，如果爬取的是热门评论，条件改为 > 1 即可
                 if len(info) > 3:
+                    print("正在爬取%s/%s页评论" % (page, page_num))
 
                     # 跳过第一页的三条热门，如果爬取的是热门评论，直接将 begin_page 换成1即可
                     if page == 1:
@@ -127,8 +130,13 @@ class WeiboComment:
 
                         self.WeiboCommentData.insert_one(data)
                         # print("微博评论：" + _comment)
-                # if (page % 50 ==0):
-                #     systime.sleep(5 + float(random.randint(1, 10)) / 20)
+
+                else:
+                    print("该条微博无评论，已跳过")
+                    break
+
+                if (page % 50 ==0):
+                    systime.sleep(10 + float(random.randint(1, 10)) / 20)
                 # 评论的每一页加个0.5s的延迟
                 systime.sleep(0.5 + float(random.randint(1, 10)) / 20)
         except Exception as e:
@@ -146,23 +154,35 @@ def main():
     filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
     # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
     # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
+    flag = 0
+    cookie = cookies[0]
     file = open("id.txt", 'r')
     lines = file.readlines()
-    cnt = 1
+    last_cnt = 425      # 记录上一次爬到哪里，用来续爬
+    cnt = 0
     for line in lines:
+        # if (cnt % 100 == 0):
+        #     flag = 1
+        #     cookie = cookies[0]
+        cnt += 1
+        if cnt != last_cnt:
+            continue
+        print("正在爬取第%d条微博" % cnt)
         line = line.strip('\n')
         comment_id, publish_time = line[:9], line[11:27]
-        print(comment_id, publish_time)
         try:
             if cnt % 20 == 0:
-                systime.sleep(5 + float(random.randint(1, 10)) / 20)  #爬取20页微博停止5s左右
-            Comment = WeiboComment(user_id, comment_id, publish_time, filter)
+                systime.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
+            Comment = WeiboComment(user_id, comment_id, publish_time, cookie, filter)
             Comment.start()
         except Exception as e:
+            cookie = cookies[1]
+            print("Cookie 已切换")
             print ("Error: ", e)
             traceback.print_exc()
+        last_cnt = cnt + 1
         # 每一条微博加个2s的延迟
-        systime.sleep(2 + float(random.randint(1, 10)) / 20)
+        systime.sleep(3 + float(random.randint(1, 10)) / 20)
 
 if __name__ == "__main__":
     main()
