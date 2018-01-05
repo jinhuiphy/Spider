@@ -10,7 +10,12 @@ import random
 import time as systime
 
 class WeiboComment:
-    cookie = {"Cookie": "Your Cookies"}  # 将Your Cookies替换成自己的cookie
+    cookie = {"Cookie": "_T_WM=00dab9533b7fcab9969b54488c0007b9;"
+                        " SUB=_2A253Sdw7DeRhGeNH7FIX-CvNzT-IHXVUteRzrDV6PUJbkdBeLUjVkW1NSpOgtXzOQWn7ZuVWQkeAdyOr-zkU85CW; "
+                        "SUHB=0bt8fR1QeGrxXH; "
+                        "SCF=AoTYxXIQ97QY0k1CNkRjEicPIWzzavue932JWj5nxoV-o6KV6-NAvFJl064DP5-NvxOauzv2RhraTB3p5WqgVc0.;"
+                        " SSOLoginState=1515039851"}  # 将your cookie替换成自己的cookie
+
 
     # WeiboComment类初始化
     def __init__(self, user_id, comment_id, publish_time, filter=0):
@@ -114,10 +119,10 @@ class WeiboComment:
             print ("Error: ", e)
 
 def main():
-    user_id = 3591355593  # 可以改成任意合法的用户id（爬虫的微博id除外）
+    user_id = 5992855888  # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    comment_id = 'CrF4s7ecG'
-    publish_time ='2015-07-18 12:06'
+    comment_id = 'FCVnRgBL'
+    publish_time ='2018-01-05 10:04'
     try:
         Comment = WeiboComment(user_id, comment_id, publish_time, filter)
         Comment.start()
