@@ -26,6 +26,10 @@ class WeiboComment:
         if self.WeiboCommentData.find():
             self.WeiboCommentData.remove({})
 
+        # 随机选取浏览器
+        UA = random.choice(agents)
+        self.headers = {'User-Agent': UA}
+
     # 获取微博下面的评论
     def get_weibo_comment(self):
         try:
@@ -34,14 +38,8 @@ class WeiboComment:
 
             # url = "https://weibo.cn/comment/hot/%s?rl=1&page=1" % (
             #     self.comment_id)     # 热门评论url
-            use_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0',
-                          'Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10',
-                          'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
-                          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'
-                          ]
-            UA = random.choice(use_agents) #随机选取浏览器
-            headers = {'User-Agent': UA}
-            html = requests.get(url, cookies = self.cookie,headers=headers).content 
+
+            html = requests.get(url, cookies = self.cookie, headers=self.headers).content
             selector = etree.HTML(html)
 
             if selector.xpath("//input[@name='mp']") == []:
@@ -57,7 +55,7 @@ class WeiboComment:
 
                 # url2 = "https://weibo.cn/comment/hot/%s?rl=1&page=%d" % (
                 # self.comment_id, page)    # 热门评论url2
-                html2 = requests.get(url2, cookies = self.cookie).content
+                html2 = requests.get(url2, cookies = self.cookie, headers = self.headers).content
                 selector2 = etree.HTML(html2)
                 info = selector2.xpath("//div[@class='c']")
 
@@ -129,8 +127,9 @@ class WeiboComment:
 
                         self.WeiboCommentData.insert_one(data)
                         # print("微博评论：" + _comment)
-                if (page % 50 ==0):
-                    systime.sleep(5 + float(random.randint(1, 10)) / 20)
+                # if (page % 50 ==0):
+                #     systime.sleep(5 + float(random.randint(1, 10)) / 20)
+                # 评论的每一页加个0.5s的延迟
                 systime.sleep(0.5 + float(random.randint(1, 10)) / 20)
         except Exception as e:
             print ("Error: ", e, " 怕是老哥爬的太快，被封了哟，赶紧提高爬虫姿势水平")
@@ -147,22 +146,22 @@ def main():
     filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
     # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
     # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
-    f = open("id.txt", 'r')
-    lines = f.readlines()
-    i=1
+    file = open("id.txt", 'r')
+    lines = file.readlines()
+    cnt = 1
     for line in lines:
         line = line.strip('\n')
-
         comment_id, publish_time = line[:9], line[11:27]
         print(comment_id, publish_time)
         try:
-            if i%20==0:
-                systime.sleep(5) #爬取20页微博停止5s
+            if cnt % 20 == 0:
+                systime.sleep(5 + float(random.randint(1, 10)) / 20)  #爬取20页微博停止5s左右
             Comment = WeiboComment(user_id, comment_id, publish_time, filter)
             Comment.start()
         except Exception as e:
             print ("Error: ", e)
             traceback.print_exc()
+        # 每一条微博加个2s的延迟
         systime.sleep(2 + float(random.randint(1, 10)) / 20)
 
 if __name__ == "__main__":
