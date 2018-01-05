@@ -29,7 +29,8 @@ class Weibo:
         self.up_num = []  # 微博对应的点赞数
         self.retweet_num = []  # 微博对应的转发数
         self.comment_num = []  # 微博对应的评论数
-        self.weibo_id = []
+        self.weibo_id = []    # 微博对应的ID
+        self.publish_device = []   # 发布设备
 
         if self.filter:
             self.flag = "原创微博内容"
@@ -91,7 +92,7 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
-    # 获取用户微博内容及对应的发布时间、点赞数、转发数、评论数
+    # 获取用户微博ID、微博内容及对应的发布时间、发布设备、点赞数、转发数、评论数
     def get_weibo_info(self):
         try:
             url = "https://weibo.cn/u/%d?filter=%d&page=1" % (
@@ -124,12 +125,19 @@ class Weibo:
                         self.weibo_content.append(weibo_content)
                         # print (u"微博内容：" + weibo_content)
 
-                        # 微博发布时间
-                        str_time = info[i].xpath("div/span[@class='ct']")
-                        str_time = str_time[0].xpath("string(.)").encode(
+                        # 微博发布时间及设备
+                        str_info = info[i].xpath("div/span[@class='ct']")
+                        str_info = str_info[0].xpath("string(.)").encode(
                             sys.stdout.encoding, "ignore").decode(
                             sys.stdout.encoding)
-                        publish_time = str_time.split(u'来自')[0]
+                        # 微博发布设备
+                        try:
+                            publish_device = str_info.split(u'来自')[1]
+                        except:
+                            publish_device = 'null'
+                        self.publish_device.append(publish_device)
+                        # 微博发布时间
+                        publish_time = str_info.split(u'来自')[0]
                         if u"刚刚" in publish_time:
                             publish_time = datetime.now().strftime(
                                 '%Y-%m-%d %H:%M')
@@ -211,13 +219,15 @@ class Weibo:
                       u"\n微博数：" + str(self.weibo_num) +
                       u"\n关注数：" + str(self.following) +
                       u"\n粉丝数：" + str(self.followers) +
-                      result_header)
+                      result_header
+                      )
             for i in range(1, self.weibo_num2 + 1):
                 text = (str(i) + ":" + self.weibo_content[i - 1] + "\n" +
                         u"发布时间：" + self.publish_time[i - 1] + "\n" +
                         u"点赞数：" + str(self.up_num[i - 1]) +
                         u"	 转发数：" + str(self.retweet_num[i - 1]) +
-                        u"	 评论数：" + str(self.comment_num[i - 1]) + "\n\n")
+                        u"	 评论数：" + str(self.comment_num[i - 1]) + "\n\n"
+                        )
                 result = result + text
             file_dir = os.path.split(os.path.realpath(__file__))[
                 0] + os.sep + "weibo"
@@ -262,6 +272,7 @@ class Weibo:
                     '微博ID':self.weibo_id[i],
                     '内容':self.weibo_content[i],
                     '发布时间':self.publish_time[i],
+                    '发布设备':self.publish_device[i],
                     '点赞数':self.up_num[i],
                     '转发数':self.retweet_num[i],
                     '评论数':self.comment_num[i]

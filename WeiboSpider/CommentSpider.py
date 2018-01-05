@@ -10,7 +10,7 @@ import random
 import time as systime
 
 class WeiboComment:
-    cookie = {"Cookie": "Your Cookies"}  # 将your cookie替换成自己的cookie
+    cookie = {"Cookie": "Your Cookies"}  # 将Your Cookies替换成自己的cookie
 
     # WeiboComment类初始化
     def __init__(self, user_id, comment_id, publish_time, filter=0):
@@ -28,8 +28,10 @@ class WeiboComment:
     # 获取微博下面的评论
     def get_weibo_comment(self):
         try:
-            url = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=1" % (
-                self.comment_id, self.user_id)
+            # url = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=1" % (
+            #     self.comment_id, self.user_id)
+            url = "https://weibo.cn/comment/hot/%s?rl=1&page=1" % (
+                self.comment_id)     # 热门评论url
             html = requests.get(url, cookies = self.cookie).content
             selector = etree.HTML(html)
 
@@ -39,15 +41,23 @@ class WeiboComment:
                 page_num = (int)(selector.xpath(
                     "//input[@name='mp']")[0].attrib["value"])
             pattern = r"\d+\.?\d*"
-            for page in range(1, 2000):
+            for page in range(1, page_num+1):
                 print("正在爬取%s/%s页评论" % (page, page_num))
-                url2 = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=%d" % (
-                self.comment_id, self.user_id, page)
+                # url2 = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=%d" % (
+                # self.comment_id, self.user_id, page)
+                url2 = "https://weibo.cn/comment/hot/%s?rl=1&page=%d" % (
+                self.comment_id, page)
                 html2 = requests.get(url2, cookies = self.cookie).content
                 selector2 = etree.HTML(html2)
                 info = selector2.xpath("//div[@class='c']")
-                if len(info) > 3:
-                    for i in range(3, len(info) - 1):
+                if len(info) > 1:
+                    for i in range(1, len(info)):
+                        # 账号名
+                        str_id = info[i].xpath("a/@href")
+                        str_name = info[i].xpath("a[@href]/text()")
+                        str_id = str_id[0]
+                        str_name = str_name[0]
+
                         # 评论内容
                         str_t = info[i].xpath("span[@class='ctt']")
                         try:
@@ -56,6 +66,21 @@ class WeiboComment:
                             sys.stdout.encoding)
                         except Exception as e:
                             print ("Error: ", e)
+
+                        # 手机型号
+                        str_time = info[i].xpath("span[@class='ct']")
+                        str_time = str_time[0].xpath("string(.)").encode(
+                            sys.stdout.encoding, "ignore").decode(
+                            sys.stdout.encoding)
+
+                        # 给手机型号大致分类
+                        str_model = str_time.split(u'来自')[1]
+                        model_list = ['Android', 'iPhone', '网页' ,'微博']
+                        for model in model_list:
+                            if model in str_model:
+                                str_model = model
+                                break
+
                         # 点赞数
                         info_zan = info[i].xpath("span[@class='cc']")
                         try:
@@ -67,7 +92,10 @@ class WeiboComment:
                             up_num = 0
                         # 数据库
                         data = {
+                            '评论人ID':str_id,
+                            '评论人昵称':str_name,
                             '评论内容':comment_content,
+                            '设备':str_model,
                             '点赞数':up_num
                         }
 
@@ -75,7 +103,6 @@ class WeiboComment:
                         # print("微博评论：" + comment_content)
 
                 systime.sleep(0.3 + float(random.randint(1, 10)) / 40)
-
         except Exception as e:
             print ("Error: ", e)
             traceback.print_exc()
