@@ -13,7 +13,17 @@ import random
 import time as systime
 
 class Weibo:
-    cookie = {"Cookie": "Your Cookies"}  # 将Your Cookies替换成自己的cookie
+    cookie = {"Cookie": "_T_WM=221007061f46f6611cee3c5e6723f5e7; "
+                        "SCF=AubFrZPBW4_Q8ZqBUZb4o6VM8AfI_2FAhtlKRfde2WY8SbX-G-KaM5BalcB6FC7JNCIhRI9z2bHIiaTlN90v9cs.; "
+                        "SUB=_2A253SdacDeThGeNI4lIY8CvFwjmIHXVUtfrUrDV6PUJbkdBeLXiikW1NSA9wvaAhBbHUVGMGUQIjVK63GfCayI76; "
+                        "SUHB=0pHhCA6bkbF_hQ; SSOLoginState=1515038412"}  # 将your cookie替换成自己的cookie
+
+    cookie_new = {"Cookie": "_T_WM=00dab9533b7fcab9969b54488c0007b9;"
+                            " SUB=_2A253Sdw7DeRhGeNH7FIX-CvNzT-IHXVUteRzrDV6PUJbkdBeLUjVkW1NSpOgtXzOQWn7ZuVWQkeAdyOr-zkU85CW; "
+                            "SUHB=0bt8fR1QeGrxXH; "
+                            "SCF=AoTYxXIQ97QY0k1CNkRjEicPIWzzavue932JWj5nxoV-o6KV6-NAvFJl064DP5-NvxOauzv2RhraTB3p5WqgVc0.;"
+                            "SSOLoginState=1515039851"}
+
 
     # Weibo类初始化
     def __init__(self, user_id, filter=0):
@@ -264,7 +274,7 @@ class Weibo:
             self.WeiboData.insert_one(user_info)
 
             # 保存微博信息,并将微博ID和发布时间保存为txt，便于后面爬取评论
-            f = open('id.txt', 'w')     # 追加写入则将w改成a
+            f = open('id.txt', 'w', encoding='utf-8')     # 追加写入则将w改成a
             for i in range(self.weibo_num2):
                 f.write(self.weibo_id[i]+'  '+self.publish_time[i]+'\n')
 
@@ -279,6 +289,9 @@ class Weibo:
                 }
 
                 self.WeiboData.insert_one(data)
+
+            f.close()
+
             print("%s条微博保存完毕" %self.weibo_num2)
 
             if not self.filter:
@@ -306,7 +319,7 @@ class Weibo:
 
 def main():
 
-    user_id = 3591355593  # 可以改成任意合法的用户id（爬虫的微博id除外）
+    user_id = 5992855888  # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
 
     try:
