@@ -154,24 +154,19 @@ def main():
     filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
     # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
     # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
-    flag = 0
     cookie = cookies[0]
     file = open("id.txt", 'r')
     lines = file.readlines()
-    last_cnt = 425      # 记录上一次爬到哪里，用来续爬
-    cnt = 0
-    for line in lines:
-        # if (cnt % 100 == 0):
-        #     flag = 1
-        #     cookie = cookies[0]
-        cnt += 1
-        if cnt != last_cnt:
-            continue
-        print("正在爬取第%d条微博" % cnt)
-        line = line.strip('\n')
+
+    last_start = 425      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
+    start = 0
+    end = len(lines)
+    for i in range(start, end):
+        print("正在爬取第%d/%d条微博" % (i+1, end+1))
+        line = lines[i].strip('\n')
         comment_id, publish_time = line[:9], line[11:27]
         try:
-            if cnt % 20 == 0:
+            if i % 20 == 0:
                 systime.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
             Comment = WeiboComment(user_id, comment_id, publish_time, cookie, filter)
             Comment.start()
@@ -180,7 +175,6 @@ def main():
             print("Cookie 已切换")
             print ("Error: ", e)
             traceback.print_exc()
-        last_cnt = cnt + 1
         # 每一条微博加个2s的延迟
         systime.sleep(3 + float(random.randint(1, 10)) / 20)
 
