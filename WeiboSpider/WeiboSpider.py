@@ -50,7 +50,7 @@ class Weibo:
         # 随机选取cookies
         # self.cookie = random.choice(cookies)
         self.cookie = cookies[0]
-        
+
     # 获取用户昵称
     def get_username(self):
         try:
@@ -114,6 +114,7 @@ class Weibo:
             pattern = r"\d+\.?\d*"
 
             for page in range(self.start_page, page_num + 1):
+                print("正在爬取第%s/%s页微博" % (page, page_num))
 
                 url2 = "https://weibo.cn/u/%d?filter=%d&page=%d" % (
                     self.user_id, self.filter, page)
@@ -125,12 +126,7 @@ class Weibo:
                     for i in range(0, len(info) - 2):
 
                         # 微博ID，为后面爬取某一条微博的评论做准备
-                        # 如果微博ID存在，说明这条微博已经爬过，遂跳过
                         weibo_id=str(id_info[i])[2:]
-                        if self.WeiboData.find_one({"微博ID":weibo_id}):
-                            print("第%s/%s页微博\t第%s条微博已爬过" % (page, page_num, i + 1))
-                            continue
-                        print("正在爬取第%s/%s页微博\t第%s条微博" % (page, page_num, i+1))
 
                         # 微博内容
                         str_t = info[i].xpath("div/span[@class='ctt']")
@@ -250,6 +246,17 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
+    # 对数据库里的信息进行去重
+    def remove_same(self):
+        print("正在去重，请稍后")
+        id_set = set()
+        for weibo in self.WeiboData.find({})[1::]:
+            if weibo["微博ID"] in id_set:
+                self.WeiboData.remove(weibo)
+            else:
+                id_set.add(weibo["微博ID"])
+        print("去重完毕")
+
     # 运行爬虫
     def start(self):
         try:
@@ -258,6 +265,7 @@ class Weibo:
                 self.get_user_info()
                 self.save_user_info()
             self.get_save_weibo_info()
+            self.remove_same()
             print (u"信息抓取完毕")
             # print ("===========================================================================")
         except Exception as e:
@@ -267,7 +275,7 @@ def main():
 
     user_id = 1811893237  # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    start_page = 11    # 1代表从第一条开始爬，会清空数据库，大于1代表续爬，不会清空之前的数据
+    start_page = 40    # 1代表从第一条开始爬，会清空数据库，大于1代表续爬，不会清空之前的数据
 
     try:
         # 实例化微博对象
