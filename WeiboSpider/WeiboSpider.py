@@ -11,22 +11,13 @@ from lxml import etree
 import pymongo
 import random
 import time as systime
+from agent import agents
+from cookies import cookies
 
 class Weibo:
-    cookie = {"Cookie": "_T_WM=221007061f46f6611cee3c5e6723f5e7; "
-                        "SCF=AubFrZPBW4_Q8ZqBUZb4o6VM8AfI_2FAhtlKRfde2WY8SbX-G-KaM5BalcB6FC7JNCIhRI9z2bHIiaTlN90v9cs.; "
-                        "SUB=_2A253SdacDeThGeNI4lIY8CvFwjmIHXVUtfrUrDV6PUJbkdBeLXiikW1NSA9wvaAhBbHUVGMGUQIjVK63GfCayI76; "
-                        "SUHB=0pHhCA6bkbF_hQ; SSOLoginState=1515038412"}  # 将your cookie替换成自己的cookie
-
-    cookie_new = {"Cookie": "_T_WM=00dab9533b7fcab9969b54488c0007b9;"
-                            " SUB=_2A253Sdw7DeRhGeNH7FIX-CvNzT-IHXVUteRzrDV6PUJbkdBeLUjVkW1NSpOgtXzOQWn7ZuVWQkeAdyOr-zkU85CW; "
-                            "SUHB=0bt8fR1QeGrxXH; "
-                            "SCF=AoTYxXIQ97QY0k1CNkRjEicPIWzzavue932JWj5nxoV-o6KV6-NAvFJl064DP5-NvxOauzv2RhraTB3p5WqgVc0.;"
-                            "SSOLoginState=1515039851"}
-
 
     # Weibo类初始化
-    def __init__(self, user_id, filter=0):
+    def __init__(self, user_id, cookie, filter=0):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.filter = filter  # 取值范围为0、1，程序默认值为0，代表要爬取用户的全部微博，1代表只爬取用户的原创微博
         self.username = ''  # 用户名，如“Dear-迪丽热巴”
@@ -54,11 +45,18 @@ class Weibo:
         if self.WeiboData.find():
             self.WeiboData.remove({})
 
+        # 随机选取浏览器
+        UA = random.choice(agents)
+        self.headers = {'User-Agent': UA}
+
+        # 设置cookies
+        self.cookie = cookie
+
     # 获取用户昵称
     def get_username(self):
         try:
             url = "https://weibo.cn/%d/info" % (self.user_id)
-            html = requests.get(url, cookies = self.cookie).content
+            html = requests.get(url, cookies = self.cookie, headers = self.headers).content
             selector = etree.HTML(html)
             username = selector.xpath("//title/text()")[0]
             self.username = username[:-3]
@@ -72,7 +70,7 @@ class Weibo:
         try:
             url = "https://weibo.cn/u/%d?filter=%d&page=1" % (
                 self.user_id, self.filter)
-            html = requests.get(url, cookies=self.cookie).content
+            html = requests.get(url, cookies=self.cookie, headers = self.headers).content
             selector = etree.HTML(html)
             pattern = r"\d+\.?\d*"
 
@@ -107,7 +105,7 @@ class Weibo:
         try:
             url = "https://weibo.cn/u/%d?filter=%d&page=1" % (
                 self.user_id, self.filter)
-            html = requests.get(url, cookies=self.cookie).content
+            html = requests.get(url, cookies=self.cookie, headers = self.headers).content
             selector = etree.HTML(html)
             if selector.xpath("//input[@name='mp']") == []:
                 page_num = 1
@@ -121,7 +119,7 @@ class Weibo:
 
                 url2 = "https://weibo.cn/u/%d?filter=%d&page=%d" % (
                     self.user_id, self.filter, page)
-                html2 = requests.get(url2, cookies=self.cookie).content
+                html2 = requests.get(url2, cookies=self.cookie, headers = self.headers).content
                 selector2 = etree.HTML(html2)
                 info = selector2.xpath("//div[@class='c']")
                 id_info =selector2.xpath("//div/@id")
@@ -321,10 +319,11 @@ def main():
 
     user_id = 5992855888  # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
+    cookie = cookies[0]
 
     try:
         # 实例化微博对象
-        wb = Weibo(user_id, filter)
+        wb = Weibo(user_id, cookie, filter)
         # 爬取微博信息
         wb.start()
 
