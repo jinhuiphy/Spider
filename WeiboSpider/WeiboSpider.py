@@ -17,7 +17,7 @@ from cookies import cookies
 class Weibo:
 
     # Weibo类初始化
-    def __init__(self, user_id, cookie, filter=0):
+    def __init__(self, user_id, start_page, filter=0):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.filter = filter  # 取值范围为0、1，程序默认值为0，代表要爬取用户的全部微博，1代表只爬取用户的原创微博
         self.username = ''  # 用户名，如“Dear-迪丽热巴”
@@ -25,13 +25,7 @@ class Weibo:
         self.weibo_num2 = 0  # 爬取到的微博数
         self.following = 0  # 用户关注数
         self.followers = 0  # 用户粉丝数
-        self.weibo_content = []  # 微博内容
-        self.publish_time = []  # 微博发布时间
-        self.up_num = []  # 微博对应的点赞数
-        self.retweet_num = []  # 微博对应的转发数
-        self.comment_num = []  # 微博对应的评论数
-        self.weibo_id = []    # 微博对应的ID
-        self.publish_device = []   # 发布设备
+        self.start_page = start_page
 
         if self.filter:
             self.flag = "原创微博内容"
@@ -42,16 +36,21 @@ class Weibo:
         dbClient = pymongo.MongoClient(host='localhost', port=27017)
         Weibo = dbClient['Weibo']
         self.WeiboData = Weibo[str(user_id)]
-        if self.WeiboData.find():
-            self.WeiboData.remove({})
+        if self.start_page == 1:
+            if self.WeiboData.find():
+                print("正在清空数据库")
+                self.WeiboData.remove({})
+        else:
+            print("上次爬到第%s页,正在续爬" % self.start_page)
 
         # 随机选取浏览器
         UA = random.choice(agents)
         self.headers = {'User-Agent': UA}
 
-        # 设置cookies
-        self.cookie = cookie
-
+        # 随机选取cookies
+        # self.cookie = random.choice(cookies)
+        self.cookie = cookies[0]
+        
     # 获取用户昵称
     def get_username(self):
         try:
@@ -101,7 +100,7 @@ class Weibo:
             traceback.print_exc()
 
     # 获取用户微博ID、微博内容及对应的发布时间、发布设备、点赞数、转发数、评论数
-    def get_weibo_info(self):
+    def get_save_weibo_info(self):
         try:
             url = "https://weibo.cn/u/%d?filter=%d&page=1" % (
                 self.user_id, self.filter)
@@ -113,9 +112,8 @@ class Weibo:
                 page_num = (int)(selector.xpath(
                     "//input[@name='mp']")[0].attrib["value"])
             pattern = r"\d+\.?\d*"
-            for page in range(1, page_num + 1):
 
-                print("正在爬取%s/%s页微博" % (page, page_num))
+            for page in range(self.start_page, page_num + 1):
 
                 url2 = "https://weibo.cn/u/%d?filter=%d&page=%d" % (
                     self.user_id, self.filter, page)
@@ -125,12 +123,21 @@ class Weibo:
                 id_info =selector2.xpath("//div/@id")
                 if len(info) > 3:
                     for i in range(0, len(info) - 2):
+
+                        # 微博ID，为后面爬取某一条微博的评论做准备
+                        # 如果微博ID存在，说明这条微博已经爬过，遂跳过
+                        weibo_id=str(id_info[i])[2:]
+                        if self.WeiboData.find_one({"微博ID":weibo_id}):
+                            print("第%s/%s页微博\t第%s条微博已爬过" % (page, page_num, i + 1))
+                            continue
+                        print("正在爬取第%s/%s页微博\t第%s条微博" % (page, page_num, i+1))
+
                         # 微博内容
                         str_t = info[i].xpath("div/span[@class='ctt']")
                         weibo_content = str_t[0].xpath("string(.)").encode(
                             sys.stdout.encoding, "ignore").decode(
                             sys.stdout.encoding)
-                        self.weibo_content.append(weibo_content)
+                        # self.weibo_content.append(weibo_content)
                         # print (u"微博内容：" + weibo_content)
 
                         # 微博发布时间及设备
@@ -138,12 +145,14 @@ class Weibo:
                         str_info = str_info[0].xpath("string(.)").encode(
                             sys.stdout.encoding, "ignore").decode(
                             sys.stdout.encoding)
+
                         # 微博发布设备
                         try:
                             publish_device = str_info.split(u'来自')[1]
                         except:
                             publish_device = 'null'
-                        self.publish_device.append(publish_device)
+                        # self.publish_device.append(publish_device)
+
                         # 微博发布时间
                         publish_time = str_info.split(u'来自')[0]
                         if u"刚刚" in publish_time:
@@ -168,12 +177,7 @@ class Weibo:
                                 year + "-" + month + "-" + day + " " + time)
                         else:
                             publish_time = publish_time[:16]
-                        self.publish_time.append(publish_time)
-                        # print (u"微博发布时间：" + publish_time)
-
-                        # 微博ID，为后面爬取某一条微博的评论做准备
-                        weibo_id=str(id_info[i])[2:]
-                        self.weibo_id.append(weibo_id)
+                        # self.publish_time.append(publish_time)
 
                         # 点赞数
                         str_zan = info[i].xpath("div/a/text()")[-4]
@@ -183,8 +187,7 @@ class Weibo:
                         except Exception as e:
                             print ("第%s条微博点赞数Error: %s" %(self.weibo_num2, e))
                             up_num = 0
-                        self.up_num.append(up_num)
-                        # print (u"点赞数: " + str(up_num))
+                        # self.up_num.append(up_num)
 
                         # 转发数
                         try:
@@ -194,8 +197,7 @@ class Weibo:
                         except Exception as e:
                             print ("第%s条微博转发数Error: %s" %(self.weibo_num2, e))
                             retweet_num = 0
-                        self.retweet_num.append(retweet_num)
-                        # print (u"转发数: " + str(retweet_num))
+                        # self.retweet_num.append(retweet_num)
 
                         # 评论数
                         comment = info[i].xpath("div/a/text()")[-2]
@@ -205,8 +207,20 @@ class Weibo:
                         except Exception as e:
                             print ("第%s条微博评论数Error: %s" %(self.weibo_num2, e))
                             comment_num = 0
-                        self.comment_num.append(comment_num)
-                        # print (u"评论数: " + str(comment_num))
+                        # self.comment_num.append(comment_num)
+
+                        # 保存微博信息
+                        data = {
+                            '微博ID':weibo_id,
+                            '内容':weibo_content,
+                            '发布时间':publish_time,
+                            '发布设备':publish_device,
+                            '点赞数':up_num,
+                            '转发数':retweet_num,
+                            '评论数':comment_num
+                        }
+
+                        self.WeiboData.insert_one(data)
 
                         self.weibo_num2 += 1
 
@@ -215,89 +229,23 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
-    # 将爬取的信息写入文件
-    def write_txt(self):
+    # 将用户信息保存到数据库
+    def save_user_info(self):
+        if self.filter:
+            flag = "原创微博内容"
+        else:
+            flag = "所有微博内容"
         try:
-            if self.filter:
-                result_header = u"\n\n原创微博内容：\n"
-            else:
-                result_header = u"\n\n微博内容：\n"
-            result = (u"用户信息\n用户昵称：" + self.username +
-                      u"\n用户id：" + str(self.user_id) +
-                      u"\n微博数：" + str(self.weibo_num) +
-                      u"\n关注数：" + str(self.following) +
-                      u"\n粉丝数：" + str(self.followers) +
-                      result_header
-                      )
-            for i in range(1, self.weibo_num2 + 1):
-                text = (str(i) + ":" + self.weibo_content[i - 1] + "\n" +
-                        u"发布时间：" + self.publish_time[i - 1] + "\n" +
-                        u"点赞数：" + str(self.up_num[i - 1]) +
-                        u"	 转发数：" + str(self.retweet_num[i - 1]) +
-                        u"	 评论数：" + str(self.comment_num[i - 1]) + "\n\n"
-                        )
-                result = result + text
-            file_dir = os.path.split(os.path.realpath(__file__))[
-                0] + os.sep + "weibo"
-            if not os.path.isdir(file_dir):
-                os.mkdir(file_dir)
-            file_path = file_dir + os.sep + "%d" % self.user_id + ".txt"
-            f = open(file_path, "wb")
-            f.write(result.encode(sys.stdout.encoding))
-            f.close()
-            print (u"微博写入文件完毕，保存路径:" + file_path)
-        except Exception as e:
-            print ("Error: ", e)
-            traceback.print_exc()
-
-    # 将爬取的微博保存到数据库
-    def save_weibo_db(self):
-        try:
-            print("正在保存微博数据")
-            if self.filter:
-                flag = "原创微博内容"
-            else:
-                flag = "所有微博内容"
-
             # 保存用户信息
             user_info = {
                 '用户名':self.username,
                 '用户ID':str(self.user_id),
                 '微博数':self.weibo_num,
-                '爬取微博数':self.weibo_num2,
                 '关注数':self.following,
                 '粉丝数':self.followers,
                 '爬取微博类型':flag
             }
             self.WeiboData.insert_one(user_info)
-
-            # 保存微博信息,并将微博ID和发布时间保存为txt，便于后面爬取评论
-            f = open('id.txt', 'w', encoding='utf-8')     # 追加写入则将w改成a
-            for i in range(self.weibo_num2):
-                f.write(self.weibo_id[i]+'  '+self.publish_time[i]+'\n')
-
-                data = {
-                    '微博ID':self.weibo_id[i],
-                    '内容':self.weibo_content[i],
-                    '发布时间':self.publish_time[i],
-                    '发布设备':self.publish_device[i],
-                    '点赞数':self.up_num[i],
-                    '转发数':self.retweet_num[i],
-                    '评论数':self.comment_num[i]
-                }
-
-                self.WeiboData.insert_one(data)
-
-            f.close()
-
-            print("%s条微博保存完毕" %self.weibo_num2)
-
-            if not self.filter:
-                print (u"共" + str(self.weibo_num2) + u"条微博")
-            else:
-                print (u"共" + str(self.weibo_num) + u"条微博，其中" +
-                       str(self.weibo_num2) + u"条为原创微博")
-
         except Exception as e:
             print ("Error: ", e)
             traceback.print_exc()
@@ -305,11 +253,11 @@ class Weibo:
     # 运行爬虫
     def start(self):
         try:
-            self.get_username()
-            self.get_user_info()
-            self.get_weibo_info()
-            # self.write_txt()
-            self.save_weibo_db()
+            if self.start_page == 1:
+                self.get_username()
+                self.get_user_info()
+                self.save_user_info()
+            self.get_save_weibo_info()
             print (u"信息抓取完毕")
             # print ("===========================================================================")
         except Exception as e:
@@ -317,16 +265,14 @@ class Weibo:
 
 def main():
 
-    user_id = 5992855888  # 可以改成任意合法的用户id（爬虫的微博id除外）
+    user_id = 1811893237  # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    cookie = cookies[0]
+    start_page = 11    # 1代表从第一条开始爬，会清空数据库，大于1代表续爬，不会清空之前的数据
 
     try:
         # 实例化微博对象
-        wb = Weibo(user_id, cookie, filter)
-        # 爬取微博信息
+        wb = Weibo(user_id, start_page, filter)
         wb.start()
-
     except Exception as e:
         print ("Error: ", e)
         traceback.print_exc()
