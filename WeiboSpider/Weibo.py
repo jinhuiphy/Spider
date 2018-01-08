@@ -11,12 +11,13 @@ import time as systime
 from agent import agents
 from cookies import cookies
 
-class WeiboComment:
+class Weibo:
+    '''将微博单独抽象为一个类，该类主要用来爬取单条微博的评论数据'''
 
-    # WeiboComment类初始化
-    def __init__(self, user_id, comment_id, publish_time, cookie, filter=0):
+    # Weibo类初始化
+    def __init__(self, user_id, weibo_id, publish_time, filter=0):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
-        self.comment_id = comment_id    # 微博代号
+        self.comment_id = weibo_id    # 微博代号
         self.publish_time = publish_time  # 微博发布时间
 
         # 建立评论数据库
@@ -31,10 +32,10 @@ class WeiboComment:
         self.headers = {'User-Agent': UA}
 
         # 设置cookies
-        self.cookie = cookie
+        self.cookie = random.choice(cookies)
 
     # 获取微博下面的评论
-    def get_weibo_comment(self):
+    def get_save_comment(self):
         try:
             url = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=1" % (
                 self.comment_id, self.user_id)      # 所有评论url2
@@ -143,40 +144,10 @@ class WeiboComment:
             print ("Error: ", e, " 怕是老哥爬的太快，被封了哟，赶紧提高爬虫姿势水平")
             traceback.print_exc()
 
-    def start(self):
+    def auto_get(self):
         try:
-            self.get_weibo_comment()
+            self.get_save_comment()
         except Exception as e:
             print ("Error: ", e)
 
-def main():
-    user_id = 5992855888      # 可以改成任意合法的用户id（爬虫的微博id除外）
-    filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
-    # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
-    cookie = cookies[0]
-    file = open("id.txt", 'r')
-    lines = file.readlines()
 
-    last_start = 425      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
-    start = 0
-    end = len(lines)
-    for i in range(start, end):
-        print("正在爬取第%d/%d条微博" % (i+1, end+1))
-        line = lines[i].strip('\n')
-        comment_id, publish_time = line[:9], line[11:27]
-        try:
-            if i % 20 == 0:
-                systime.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
-            Comment = WeiboComment(user_id, comment_id, publish_time, cookie, filter)
-            Comment.start()
-        except Exception as e:
-            cookie = cookies[1]
-            print("Cookie 已切换")
-            print ("Error: ", e)
-            traceback.print_exc()
-        # 每一条微博加个2s的延迟
-        systime.sleep(3 + float(random.randint(1, 10)) / 20)
-
-if __name__ == "__main__":
-    main()

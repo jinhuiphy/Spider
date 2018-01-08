@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 
-import os
 import re
 import requests
 import sys
@@ -14,9 +13,10 @@ import time as systime
 from agent import agents
 from cookies import cookies
 
-class Weibo:
+class WeiboUser:
+    '''将一个微博用户抽象为一个类，该类主要用来爬取用户个人信息及其微博数据'''
 
-    # Weibo类初始化
+    # WeiboUser类初始化
     def __init__(self, user_id, start_page, filter=0):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.filter = filter  # 取值范围为0、1，程序默认值为0，代表要爬取用户的全部微博，1代表只爬取用户的原创微博
@@ -25,8 +25,9 @@ class Weibo:
         self.weibo_num2 = 0  # 爬取到的微博数
         self.following = 0  # 用户关注数
         self.followers = 0  # 用户粉丝数
-        self.start_page = start_page
+        self.start_page = start_page    # 开始爬的微博页数
 
+        # 判断爬取的微博是所有微博还是仅原创微博
         if self.filter:
             self.flag = "原创微博内容"
         else:
@@ -99,8 +100,29 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
-    # 获取用户微博ID、微博内容及对应的发布时间、发布设备、点赞数、转发数、评论数
-    def get_save_weibo_info(self):
+    # 将用户信息保存到数据库
+    def save_user_info(self):
+        if self.filter:
+            flag = "原创微博内容"
+        else:
+            flag = "所有微博内容"
+        try:
+            # 保存用户信息
+            user_info = {
+                '用户名':self.username,
+                '用户ID':str(self.user_id),
+                '微博数':self.weibo_num,
+                '关注数':self.following,
+                '粉丝数':self.followers,
+                '爬取微博类型':flag
+            }
+            self.WeiboData.insert_one(user_info)
+        except Exception as e:
+            print ("Error: ", e)
+            traceback.print_exc()
+
+    # 获取并保存用户微博ID、微博内容及对应的发布时间、发布设备、点赞数、转发数、评论数
+    def get_save_weibo(self):
         try:
             url = "https://weibo.cn/u/%d?filter=%d&page=1" % (
                 self.user_id, self.filter)
@@ -225,27 +247,6 @@ class Weibo:
             print ("Error: ", e)
             traceback.print_exc()
 
-    # 将用户信息保存到数据库
-    def save_user_info(self):
-        if self.filter:
-            flag = "原创微博内容"
-        else:
-            flag = "所有微博内容"
-        try:
-            # 保存用户信息
-            user_info = {
-                '用户名':self.username,
-                '用户ID':str(self.user_id),
-                '微博数':self.weibo_num,
-                '关注数':self.following,
-                '粉丝数':self.followers,
-                '爬取微博类型':flag
-            }
-            self.WeiboData.insert_one(user_info)
-        except Exception as e:
-            print ("Error: ", e)
-            traceback.print_exc()
-
     # 对数据库里的信息进行去重
     def remove_same(self):
         print("正在去重，请稍后")
@@ -257,33 +258,15 @@ class Weibo:
                 id_set.add(weibo["微博ID"])
         print("去重完毕")
 
-    # 运行爬虫
-    def start(self):
+    # 自动获取该用户所有信息
+    def auto_get(self):
         try:
             if self.start_page == 1:
                 self.get_username()
                 self.get_user_info()
                 self.save_user_info()
-            self.get_save_weibo_info()
+            self.get_save_weibo()
             self.remove_same()
-            print (u"信息抓取完毕")
-            # print ("===========================================================================")
+            print (u"该用户所有信息抓取完毕")
         except Exception as e:
             print ("Error: ", e)
-
-def main():
-
-    user_id = 1811893237  # 可以改成任意合法的用户id（爬虫的微博id除外）
-    filter = 0  # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    start_page = 40    # 1代表从第一条开始爬，会清空数据库，大于1代表续爬，不会清空之前的数据
-
-    try:
-        # 实例化微博对象
-        wb = Weibo(user_id, start_page, filter)
-        wb.start()
-    except Exception as e:
-        print ("Error: ", e)
-        traceback.print_exc()
-
-if __name__ == "__main__":
-    main()
