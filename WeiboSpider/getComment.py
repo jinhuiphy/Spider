@@ -26,7 +26,9 @@ def main():
     # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
     # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
 
-    idPath = str(user_id) + '_id.txt'
+
+    # 读取微博的所有ID信息，如果ID.txt不存在，则自动创建
+    idPath = "WeiboID/" + str(user_id) + '_id.txt'
     try:
         file = open(idPath, 'r')
         lines = file.readlines()
@@ -36,8 +38,8 @@ def main():
         file = open(idPath, 'r')
         lines = file.readlines()
 
-    last_start = 425      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
-    start = 0
+    last_start = 225      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
+    start = 225
     end = len(lines)
     for i in range(start, end):
         print("正在爬取第%d/%d条微博" % (i+1, end+1))

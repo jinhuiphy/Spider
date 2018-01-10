@@ -32,7 +32,8 @@ class Weibo:
         self.headers = {'User-Agent': UA}
 
         # 设置cookies
-        self.cookie = random.choice(cookies)
+        # self.cookie = random.choice(cookies)
+        self.cookie  = cookies[0]
 
     # 获取微博下面的评论
     def get_save_comment(self):
@@ -91,7 +92,7 @@ class Weibo:
                             sys.stdout.encoding, "ignore").decode(
                             sys.stdout.encoding)
                         except Exception as e:
-                            print ("Error: ", e)
+                            print ("爬取评论内容时出错：", e)
 
                         # 发布时的状态，包括发布时间和发布设备
                         publish_info = info[i].xpath("span[@class='ct']")
@@ -100,7 +101,7 @@ class Weibo:
                             sys.stdout.encoding, "ignore").decode(
                             sys.stdout.encoding)
                         except Exception as e:
-                            print ("Error: ", e)
+                            print ("爬取发布状态时出错: ", e)
 
                         # 给手机型号大致分类
                         _device = publish_info.split(u'来自')[1]
@@ -133,7 +134,7 @@ class Weibo:
                         # print("微博评论：" + _comment)
 
                 else:
-                    print("该条微博无评论，已跳过")
+                    print("该页无评论，已跳过")
                     break
 
                 if (page % 50 ==0):

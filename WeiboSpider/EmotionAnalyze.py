@@ -2,10 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from snownlp import SnowNLP
 
-def getData():
+
+def getData(commentPath, emotionPath):
     '''使用snowlp来分析每一条评论的情感值'''
-    readFile = open(r'comment.txt','r',encoding='utf-8') # 评论的txt文件
-    resultFile = open(r'data.txt','w',encoding='utf-8') # 存放情感值的txt文件
+    # user_id = 5992855888
+    # commentPath = "WeiboComment/" + str(user_id) + '_comment.txt'
+    # emotionPath = "EmotionValue/" + str(user_id) + '_emotion.txt'
+    readFile = open(commentPath, 'r', encoding='utf-8') # 评论的txt文件
+    resultFile = open(emotionPath, 'w', encoding='utf-8') # 存放情感值的txt文件
 
     lines = readFile.readlines()
 
@@ -14,32 +18,42 @@ def getData():
 
     for i in range(start, end):
         print("正在分析第%s/%s条评论" % (i+1, end+1))
-        snow = SnowNLP(lines[i])
+        time = lines[i].split('\t')[0]
+        comment = lines[i].split('\t')[1]
+        snow = SnowNLP(comment)
         data = snow.sentiments
-        resultFile.write(str(data)+'\n')
+        resultFile.write(time + '\t' + str(data)+'\n')
+    print("评论分析完毕")
 
     readFile.close()
     resultFile.close()
 
-def Draw():
+def Draw(user_id, emotionPath):
     '''将情感分析的数值以hist的形式画出来'''
+    print("画图中，请稍后")
     sentimentsList = []
-    readFile = open(r'data.txt','r',encoding='utf-8')
+    emotionPath = "EmotionValue/" + str(user_id) + '_emotion.txt'
+    readFile = open(emotionPath, 'r', encoding='utf-8')
     lines = readFile.readlines()
     for line in lines:
-        sentimentsList.append(float(line))
+        value = line.split('\t')[1]
+        sentimentsList.append(float(value))
 
-    plt.hist(sentimentsList, bins = np.arange(0, 1, 0.01), color = 'g', edgecolor = 'b')
+    plt.hist(sentimentsList, bins = np.arange(0, 1, 0.02), color = 'g', edgecolor = 'b', normed=True)   # , cumulative=True
     plt.xlabel('Emotion Value')
     plt.ylabel('Probability')
     plt.title('Emotional analysis statistics histogram')
-    plt.axis([0, 1, 0, 500])
+    # plt.xticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     plt.grid(True)
     plt.show()
+    print("作图完毕")
 
 def main():
-    # getData()
-    Draw()
+    user_id = 5992855888
+    commentPath = "WeiboComment/" + str(user_id) + '_comment.txt'
+    emotionPath = "EmotionValue/" + str(user_id) + '_emotion.txt'
+    getData(commentPath, emotionPath)
+    Draw(user_id, emotionPath)
 
 if __name__ == "__main__":
     main()
