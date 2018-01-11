@@ -21,11 +21,8 @@ def getID(user_id, idPath):
     save_as_txt(WeiboID, idPath)
 
 def main():
-    user_id = 5992855888      # 可以改成任意合法的用户id（爬虫的微博id除外）
+    user_id = 3591355593     # 可以改成任意合法的用户id（爬虫的微博id除外）
     filter = 0      # 值为0表示爬取全部微博（原创微博+转发微博），值为1表示只爬取原创微博
-    # comment_id = 'CrF4s7ecG'    # 你要爬取的微博的ID，可以通过前面爬取微博的时候得到
-    # publish_time ='2015-07-18 12:06'    # 发布时间也可以通过前面爬取微博的时候得到
-
 
     # 读取微博的所有ID信息，如果ID.txt不存在，则自动创建
     idPath = "WeiboID/" + str(user_id) + '_id.txt'
@@ -39,21 +36,24 @@ def main():
         lines = file.readlines()
 
     last_start = 225      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
-    start = 225
-    end = len(lines)
+    start = 0       # 开始爬取的微博位置，0代表从第一条开始爬取
+    end = 1         # 结束的微博位置，比start大1就代表只爬一条，如果要爬取全部微博只要改为len（lines）即可
     for i in range(start, end):
-        print("正在爬取第%d/%d条微博" % (i+1, end+1))
+        if (end - start) == 1:
+            print("正在爬取第%s条微博" % (i+1))
+        else:
+            print("正在爬取第%d/%d条微博" % (i+1, end+1))
         line = lines[i].strip('\n')
         weibo_id, publish_time = line[:9], line[10:27]
         print(weibo_id, publish_time)
         try:
-            if i % 20 == 0:
-                time.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
-            Comment = Weibo(user_id, weibo_id, publish_time, filter)
+            # if i % 20 == 0:
+            #     time.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
+            start_page = 17160
+            Comment = Weibo(user_id, weibo_id, publish_time, start_page, filter)
             Comment.auto_get()
         except Exception as e:
-            cookie = cookies[1]
-            print("Cookie 已切换")
+            print("Cookie 出故障，请更新cookie")
             print ("Error: ", e)
             traceback.print_exc()
         # 每一条微博加个2s的延迟

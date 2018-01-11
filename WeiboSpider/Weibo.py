@@ -19,15 +19,18 @@ class Weibo:
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.comment_id = weibo_id    # 微博代号
         self.publish_time = publish_time  # 微博发布时间
-        self.start_page = start_page
+        self.start_page = start_page    # 爬取的评论起始页
 
         # 建立评论数据库
         dbClient = pymongo.MongoClient(host='localhost', port=27017)
         Comment = dbClient[str(self.user_id) + '--微博评论']
         self.WeiboCommentData = Comment[str(publish_time)]
-        if self.start_page == 0:
+        if self.start_page == 1:
             if self.WeiboCommentData.find():
+                print("正在清空数据库")
                 self.WeiboCommentData.remove({})
+        else:
+            print("上次爬到第%s页,正在续爬" % self.start_page)
 
         # 随机选取浏览器
         UA = random.choice(agents)
@@ -58,15 +61,20 @@ class Weibo:
             pattern = r"\d+\.?\d*"
 
             # 用来记录没有评论的页数出现的次数，如果连续5页都没有评论，则结束程序
-            time = 0
-            
+            count = 0
+
             for page in range(self.start_page, page_num+1):
-                # 每爬30页就切换个cookie
-                if (page+1) % 30 == 0:
-                    num = (page+1)/30
-                    choice = int(num % 4)
+                # 每爬30页就切换个cookie并随机切换浏览器
+                if (page) % 30 == 0:
+
+                    UA = random.choice(agents)
+                    self.headers = {'User-Agent': UA}
+
+                    num = page / 30
+
+                    choice = int(num % len(cookies))
                     self.cookie = cookies[choice]
-                    print("Cookie已切换")
+                    print("Cookie已切换为第%s个" % (choice + 1))
 
                 url2 = "https://weibo.cn/comment/%s?uid=%d&rl=0&page=%d" % (
                 self.comment_id, self.user_id, page)    # 所有评论url2
@@ -145,19 +153,19 @@ class Weibo:
                         }
 
                         self.WeiboCommentData.insert_one(data)
-                        # print("微博评论：" + _comment)
-                        if time > 0:
-                            time -= 1
+
+                        # 保证count最小为0
+                        if count > 0:
+                            count -= 1
 
                 else:
                     print("该页无评论，已跳过")
-                    time += 1
-                    if time == 5:
+                    count += 1
+                    if count == 5:
+                        print("已经连续5页没有评论，该条微博自动结束")
                         break
 
-                # if (page % 50 ==0):
-                #     systime.sleep(10 + float(random.randint(1, 10)) / 20)
-                # 评论的每一页加个0.5s的延迟
+                # 评论的每一页加个0.1s的延迟
                 systime.sleep(0.1 + float(random.randint(1, 5)) / 20)
         except Exception as e:
             print ("Error: ", e, " 怕是老哥爬的太快，被封了哟，赶紧提高爬虫姿势水平")

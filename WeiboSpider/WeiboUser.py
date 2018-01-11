@@ -136,6 +136,18 @@ class WeiboUser:
             pattern = r"\d+\.?\d*"
 
             for page in range(self.start_page, page_num + 1):
+                # 每爬50页就切换个cookie并随机切换浏览器
+                if (page) % 50 == 0:
+
+                    UA = random.choice(agents)
+                    self.headers = {'User-Agent': UA}
+
+                    num = page / 50
+
+                    choice = int(num % len(cookies))
+                    self.cookie = cookies[choice]
+                    print("Cookie已切换为第%s个" % (choice + 1))
+
                 print("正在爬取第%s/%s页微博" % (page, page_num))
 
                 url2 = "https://weibo.cn/u/%d?filter=%d&page=%d" % (
