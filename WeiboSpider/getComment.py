@@ -46,15 +46,16 @@ def main():
         # line = lines[i].strip('\n')
         # weibo_id, publish_time = line[:9], line[10:27]
         weibo_id, publish_time = "FD9iMvjdr", "2018-01-06 21:30"
-        print(weibo_id, publish_time)
-        part = 20
+        # print(weibo_id, publish_time)
+        part = 20       # 分组的标号，1代表第一个分组，长度为默认分组大小
+        part_length = 1600      # 分组大小，每分组标号每增加1，实际的页码就增加分组大小
         try:
             # if i % 20 == 0:
             #     time.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
-            start_page = 119787
-            # start_page = 109000 + 1600 * ((part-13)-1)
-            end_page = 109000 + 1600 * (part-13)
-            Comment = Weibo(user_id, weibo_id, publish_time, start_page, end_page, part)
+            # start_page = 119787
+            start_page = 109000 + part_length * ((part-13)-1)
+            end_page = 109000 + part_length * (part-13)
+            Comment = Weibo(user_id, weibo_id, publish_time, start_page, end_page, part, part_length)
             Comment.auto_get()
         except Exception as e:
             print("Cookie 出故障，请更新cookie")

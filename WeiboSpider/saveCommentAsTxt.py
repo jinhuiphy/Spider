@@ -13,7 +13,7 @@ def main():
     real_id = 1214435497
     part = 23
     print("正在保存第%s条" % part)
-    commentPath = "WeiboComment/" + str(real_id) + '_comment_Total.txt'
+    commentPath = "WeiboID/" + str(real_id) + '_comment_Total.txt'
     file = open(commentPath, 'a', encoding='utf-8')
 
     dbClient = pymongo.MongoClient(host='localhost', port=27017)

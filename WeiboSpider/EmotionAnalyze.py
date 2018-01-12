@@ -40,20 +40,27 @@ def getData(commentPath, emotionPath):
 
 def Draw(user_id, emotionPath):
     """将情感分析的数值以hist的形式画出来"""
-    print("画图中，请稍后")
+
     sentimentsList = []
     # emotionPath = "EmotionValue/" + str(user_id) + '_emotion_Part' + str(part) + '.txt'
     readFile = open(emotionPath, 'r', encoding='utf-8')
     lines = readFile.readlines()
+
+    print("正在读取%s条数据" % len(lines))
+
     for line in lines:
         # value = line.split('\t')[1]
         value = line
+        # if float(value) == 1.0:
+        #     count += 1
         sentimentsList.append(float(value))
-
-    plt.hist(sentimentsList, bins=np.arange(0, 1, 0.01), color='g', edgecolor='b', normed=True)  # , cumulative=True
+    print("画图中，请稍后")
+    plt.hist(sentimentsList, bins=np.arange(0, 1.01, 0.2), color='g', edgecolor='k')  # , cumulative=True, normed=True
     plt.xlabel('Emotion Value')
     plt.ylabel('Probability')
+    plt.ylabel('Frequency')
     plt.title('Emotional analysis statistics histogram')
+    # plt.xlim(0, 1.2)
     # plt.xticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     plt.grid(True)
     plt.show()
@@ -62,15 +69,15 @@ def Draw(user_id, emotionPath):
 
 def main():
     user_id = 1214435497
-    part = 23
-    print("当前进程Part%s" % part)
+    # part = 23
+    # print("当前进程Part%s" % part)
 
-    commentPath = "WeiboComment/" + str(user_id) + '_comment_Part' + str(part) + '.txt'
-    emotionPath = "EmotionValue/" + str(user_id) + '_emotion_Part' + str(part) + '.txt'
-    # commentPath = "WeiboComment/" + str(user_id) + '_comment_Total.txt'
-    # emotionPath = "EmotionValue/" + str(user_id) + '_emotion_Total.txt'
-    getData(commentPath, emotionPath)
-    # Draw(user_id, emotionPath)
+    # commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Part' + str(part) + '.txt'
+    # emotionPath = "EmotionValue/" + str(user_id) + '_emotion_value/' + str(user_id) + '_emotion_Part' + str(part) + '.txt'
+    commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Total.txt'
+    emotionPath = "EmotionValue/" + str(user_id) + '_emotion_value/' + str(user_id) + '_emotion_Total.txt'
+    # getData(commentPath, emotionPath)
+    Draw(user_id, emotionPath)
 
 
 if __name__ == "__main__":

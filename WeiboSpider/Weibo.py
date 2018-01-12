@@ -16,13 +16,14 @@ class Weibo:
     """将微博单独抽象为一个类，该类主要用来爬取单条微博的评论数据"""
 
     # Weibo类初始化
-    def __init__(self, user_id, weibo_id, publish_time, start_page, end_page, part):
+    def __init__(self, user_id, weibo_id, publish_time, start_page, end_page, part, part_length):
         self.user_id = user_id  # 用户id，即需要我们输入的数字，如昵称为“Dear-迪丽热巴”的id为1669879400
         self.comment_id = weibo_id    # 微博代号
         self.publish_time = publish_time  # 微博发布时间
         self.start_page = start_page    # 爬取的评论起始页
-        self.end_page = end_page
-        self.part = part
+        self.end_page = end_page        # 爬取的评论终止页
+        self.part = part        # 所爬取的评论的第几部分，按照分组大小一次叠加
+        self.part_length = part_length      # 每一分组的大小
 
         # 建立评论数据库
         dbClient = pymongo.MongoClient(host='localhost', port=27017)
@@ -67,7 +68,7 @@ class Weibo:
             count = 0
 
             # 用来爬取结尾，分组的最后一个把结尾爬完
-            if page_num - self.end_page < 1600:
+            if page_num - self.end_page < self.part_length:
                 self.end_page = page_num
 
             for page in range(self.start_page, self.end_page+1):
