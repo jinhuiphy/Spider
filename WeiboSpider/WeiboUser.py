@@ -141,12 +141,12 @@ class WeiboUser:
 
             for page in range(self.start_page, page_num + 1):
                 # 每爬50页就切换个cookie并随机切换浏览器
-                if page % 50 == 0:
+                if page % 30 == 0:
 
                     ua = random.choice(agents)
                     self.headers = {'User-Agent': ua}
 
-                    num = page / 50
+                    num = page / 30
 
                     choice = int(num % len(cookies))
                     self.cookie = cookies[choice]
@@ -184,7 +184,7 @@ class WeiboUser:
                         try:
                             publish_device = str_info.split(u'来自')[1]
                         except Exception as e:
-                            print("第%s条微博发布设备Error: %s" % (self.weibo_num2, e))
+                            # print("第%s条微博发布设备Error: %s" % (self.weibo_num2, e))
                             publish_device = 'null'
                         # self.publish_device.append(publish_device)
 
@@ -259,7 +259,7 @@ class WeiboUser:
 
                         self.weibo_num2 += 1
 
-                systime.sleep(0.5 + float(random.randint(1, 10)) / 20)
+                systime.sleep(0.2 + float(random.randint(1, 5)) / 20)
         except Exception as e:
             print("Error: ", e)
             traceback.print_exc()

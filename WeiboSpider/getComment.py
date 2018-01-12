@@ -21,19 +21,19 @@ def getID(user_id, idPath):
 
 
 def main():
-    user_id = 3591355593     # 可以改成任意合法的用户id（爬虫的微博id除外）
+    user_id = 1980768563     # 可以改成任意合法的用户id（爬虫的微博id除外）
 
-    # 读取微博的所有ID信息，如果ID.txt不存在，则自动创建
-    idPath = "WeiboID/" + str(user_id) + '_id.txt'
-    try:
-        file = open(idPath, 'r')
-        lines = file.readlines()
-    except Exception as e:
-        print("Error: ", e)
-        print("ID文件不存在，将自动创建")
-        getID(user_id, idPath)
-        file = open(idPath, 'r')
-        lines = file.readlines()
+    # # 读取微博的所有ID信息，如果ID.txt不存在，则自动创建
+    # idPath = "WeiboID/" + str(user_id) + '_id.txt'
+    # try:
+    #     file = open(idPath, 'r')
+    #     lines = file.readlines()
+    # except Exception as e:
+    #     print("Error: ", e)
+    #     print("ID文件不存在，将自动创建")
+    #     getID(user_id, idPath)
+    #     file = open(idPath, 'r')
+    #     lines = file.readlines()
 
     last_start = 225      # 记录上一次爬到哪里，继续爬的话只需要将start改为last_start的值即可
     start = 0       # 开始爬取的微博位置，0代表从第一条开始爬取
@@ -43,14 +43,18 @@ def main():
             print("正在爬取第%s条微博" % (i+1))
         else:
             print("正在爬取第%d/%d条微博" % (i+1, end+1))
-        line = lines[i].strip('\n')
-        weibo_id, publish_time = line[:9], line[10:27]
+        # line = lines[i].strip('\n')
+        # weibo_id, publish_time = line[:9], line[10:27]
+        weibo_id, publish_time = "FD9iMvjdr", "2018-01-06 21:30"
         print(weibo_id, publish_time)
+        part = 20
         try:
             # if i % 20 == 0:
             #     time.sleep(20 + float(random.randint(1, 10)) / 20)  #爬取20条微博停止5s左右
-            start_page = 17160
-            Comment = Weibo(user_id, weibo_id, publish_time, start_page)
+            start_page = 119787
+            # start_page = 109000 + 1600 * ((part-13)-1)
+            end_page = 109000 + 1600 * (part-13)
+            Comment = Weibo(user_id, weibo_id, publish_time, start_page, end_page, part)
             Comment.auto_get()
         except Exception as e:
             print("Cookie 出故障，请更新cookie")
