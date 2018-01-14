@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from snownlp import SnowNLP
 import datetime
-
+import os
 
 def getData(commentPath, emotionPath):
     """使用snowlp来分析每一条评论的情感值"""
@@ -13,14 +13,11 @@ def getData(commentPath, emotionPath):
 
     start = 0
     end = len(lines)
-
-    total = end // 1000
+    total = int(end // 1000)
 
     start_time = datetime.datetime.now()
     for i in range(start, end):
-
-        time = i % 1000
-        if time == 0:
+        if i % 1000 == 0:
             end_time = datetime.datetime.now()
             print("正在分析第%s/%s千条评论" % (i//1000 + 1, total))
             print("耗时%s" %(end_time - start_time))
@@ -42,7 +39,7 @@ def Draw(user_id, emotionPath):
     """将情感分析的数值以hist的形式画出来"""
 
     sentimentsList = []
-    # emotionPath = "EmotionValue/" + str(user_id) + '_emotion_Part' + str(part) + '.txt'
+
     readFile = open(emotionPath, 'r', encoding='utf-8')
     lines = readFile.readlines()
 
@@ -57,11 +54,9 @@ def Draw(user_id, emotionPath):
     print("画图中，请稍后")
     plt.hist(sentimentsList, bins=np.arange(0, 1.01, 0.2), color='g', edgecolor='k')  # , cumulative=True, normed=True
     plt.xlabel('Emotion Value')
-    plt.ylabel('Probability')
+    # plt.ylabel('Probability')
     plt.ylabel('Frequency')
     plt.title('Emotional analysis statistics histogram')
-    # plt.xlim(0, 1.2)
-    # plt.xticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     plt.grid(True)
     plt.show()
     print("作图完毕")
@@ -69,14 +64,23 @@ def Draw(user_id, emotionPath):
 
 def main():
     user_id = 1214435497
-    # part = 23
+    part = 23
     # print("当前进程Part%s" % part)
 
-    # commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Part' + str(part) + '.txt'
-    # emotionPath = "EmotionValue/" + str(user_id) + '_emotion_value/' + str(user_id) + '_emotion_Part' + str(part) + '.txt'
-    commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Total.txt'
-    emotionPath = "EmotionValue/" + str(user_id) + '_emotion_value/' + str(user_id) + '_emotion_Total.txt'
-    # getData(commentPath, emotionPath)
+    # 如果文件夹不存在就自动创建
+    startPath = "EmotionValue/" + str(user_id) + '_emotion_value/'
+    if not os.path.exists(startPath):
+        os.makedirs(startPath)
+
+    # 文件路径，如果part取0，代表的是总的文件
+    if part ==  0:
+        commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Total.txt'
+        emotionPath = startPath + str(user_id) + '_emotion_Total.txt'
+    else:
+        commentPath = "WeiboComment/" + str(user_id) + '_comment/' + str(user_id) + '_comment_Part' + str(part) + '.txt'
+        emotionPath = startPath + str(user_id) + '_emotion_Part' + str(part) + '.txt'
+
+    getData(commentPath, emotionPath)
     Draw(user_id, emotionPath)
 
 

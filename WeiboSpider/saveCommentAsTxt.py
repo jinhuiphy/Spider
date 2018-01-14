@@ -1,5 +1,5 @@
 import pymongo
-
+import os
 
 def save_as_txt(db, dataPath):
     with open(dataPath, 'w', encoding='utf-8') as f:
@@ -12,9 +12,13 @@ def main():
     user_id = 3591355593
     real_id = 1214435497
     part = 23
-    print("正在保存第%s条" % part)
-    commentPath = "WeiboID/" + str(real_id) + '_comment_Total.txt'
-    file = open(commentPath, 'a', encoding='utf-8')
+    print("正在保存第%s部分" % part)
+    startPath = 'WeiboComment/' + str(user_id) +'_comment/'
+    if not os.path.exists(startPath):
+        os.makedirs(startPath)
+
+    commentPath = startPath + str(user_id) + '_emotion_Part' + str(part) + '.txt'
+    file = open(commentPath, 'w', encoding='utf-8')
 
     dbClient = pymongo.MongoClient(host='localhost', port=27017)
     Comment = dbClient[str(user_id) + "--微博评论--Part" + str(part)]
