@@ -32,7 +32,7 @@ def getLocation(city):
     city = city.split(" ")[0]
 
     print(city)
-    ak = 'usvmj8KfNKGNi797d7j8itn4Y0sF1z6y'
+    ak = '输入你自己的百度API ak值'
     url = 'http://api.map.baidu.com/geocoder/v2/?address=' + city + '&output=json&ak=' + ak + '&callback=showLocation'
     # print(url)
     url = quote(url, safe = string.printable)
