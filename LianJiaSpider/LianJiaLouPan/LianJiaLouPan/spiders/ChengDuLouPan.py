@@ -11,36 +11,41 @@ from lxml import etree
 class ChengDuSpider(Spider):
     name="ChengDuLouPan"
 
-    download_delay = 0.6
+    download_delay = 0.3
 
     allowed_domains=[]
 
     base_url = "https://cd.fang.lianjia.com"
 
     start_urls=[
-        'https://cd.fang.lianjia.com/loupan/pg1'
+        'https://cd.fang.lianjia.com/loupan/pg1/'
     ]
 
     def parse(self, response):
+        """获取总页数对应的url"""
+
         sel = etree.HTML(response.text)
-        # sel = Selector(response)
         page_info = sel.xpath("//div[@class='page-box house-lst-page-box']/@page-data")[0]
         page_info = json.loads(page_info)
         total_page = page_info.get("totalPage")
         print(total_page)
         for i in range(int(total_page)):
-            url = self.base_url + '/loupan/pg' + str(i+1)
+            url = self.base_url + '/loupan/pg' + str(i+1) + '/'
             print(url)
-            yield Request(url, callback=self.parse_loupan)
+            yield Request(url, callback=self.parse_loupan, dont_filter=True)
 
     def parse_loupan(self, response):
+        """获取每一页相应楼盘对应的url"""
+
         sel = etree.HTML(response.text)
         loupan_list = sel.xpath("//div[@class='pic-panel']/a/@href")
         for loupan in loupan_list:
             url = self.base_url + loupan
-            yield Request(url, callback=self.parse_detail)
+            yield Request(url, callback=self.parse_detail, dont_filter=True)
 
     def parse_detail(self, response):
+        """具体处理获取某一个楼盘的信息"""
+
         sel = etree.HTML(response.text)
         item = LianjialoupanItem()
 

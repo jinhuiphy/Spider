@@ -26,46 +26,53 @@ def saveData(db, path, city):
 
 def getLocation(city):
     """"通过调用百度的API，获得地理位置的经纬度"""
-    print(city)
-    city = city.strip()
-    city = city.split("（")[0]
-    city = city.split(" ")[0]
 
+    # 处理爬下来的地理位置
     print(city)
-    ak = '输入你自己的百度API ak值'
+    city = city.strip()     # 去除首末位置的空格换行符
+    city = city.split("（")[0]       # 去除括号里面的内容
+    city = city.split(" ")[0]       # 去除空格后面的内容
+    print(city)
+
+    ak = '你自己的ak值'     # 你的百度API的ak值
     url = 'http://api.map.baidu.com/geocoder/v2/?address=' + city + '&output=json&ak=' + ak + '&callback=showLocation'
     # print(url)
     url = quote(url, safe = string.printable)
     # print(url)
-    page = urlopen(url).read().decode('utf-8')
-    # data_json = page.read().decode('utf-8')
-    # data_json = json.loads(page)
-    page = page.replace("showLocation&&showLocation(", "")
-    page = page.replace(")", "")
-    print(page)
-    data_json = json.loads(page)
-    data_dict = dict(data_json)
-    if data_dict["status"] == 0:
+    try:
+        page = urlopen(url).read().decode('utf-8')
+
+        # 处理返回的json数据
+        page = page.replace("showLocation&&showLocation(", "")
+        page = page.replace(")", "")
+        print(page)
+
+        # 将数据转换为dict
+        data_json = json.loads(page)
+        data_dict = dict(data_json)
         lng = data_dict["result"]["location"]["lng"]
         lat = data_dict["result"]["location"]["lat"]
-    else:
+    except Exception as e:
+        print("Error：", e)
         lng = 'null'
         lat = 'null'
     return lng, lat
 
 
 def main():
-    city = 'ChongQing'
-    city_china = '重庆'
+    city = 'NanJing'        # 用于匹配相应的数据库
+    city_china = '南京'       # 方便百度API调用
     dbClient = pymongo.MongoClient(host='localhost', port=27017)
     LianJia = dbClient['LianJia']
     LouPan = LianJia[city + 'LouPan']
 
+    # 创建文件目录
     startPath = 'Data/' + city + 'LouPan/'
     if not os.path.exists(startPath):
         os.makedirs(startPath)
     filePath = startPath + city + 'LouPan.xlsx'
 
+    # 将数据保存为xlsx格式
     saveData(LouPan, filePath, city_china)
 
 

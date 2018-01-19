@@ -5,18 +5,20 @@ from LianJiaZuFang.items import LianjiazufangItem
 import json
 from lxml import etree
 
-class NanJingSpider(Spider):
-    name="NanJingZuFang"
+class ChangShaSpider(Spider):
+    name="XiaMenZuFang"
 
     download_delay = 0.2
 
     allowed_domains=[]
 
-    base_url = "https://nj.lianjia.com"
+    base_url = "https://xm.lianjia.com"
 
     start_urls=[
-        'https://nj.lianjia.com/zufang/pg1/'
+        'https://xm.lianjia.com/zufang/pg1/'
     ]
+
+    count = 0
 
     def parse(self, response):
         """先获得当地所有的地区"""
@@ -28,7 +30,7 @@ class NanJingSpider(Spider):
             url = self.base_url + region + 'pg1/'
             print(url)
             base_url = self.base_url + region
-            yield Request(url, meta={'base_url': base_url}, callback=self.parse_region, dont_filter=True)
+            yield Request(url, meta={'base_url':base_url}, callback=self.parse_region, dont_filter=True)
 
     def parse_region(self, response):
         """然后根据地区，获取该地区所有的页数"""
@@ -49,6 +51,8 @@ class NanJingSpider(Spider):
 
     def parse_zufang(self, response):
         """获得某一页当中的所有租房信息"""
+        self.count += 1
+        print("正在爬取第%s页" % self.count)
         sel = etree.HTML(response.text)
         zufang_list = sel.xpath("//div[@class='pic-panel']/a/@href")
         for zufang in zufang_list:
@@ -72,6 +76,7 @@ class NanJingSpider(Spider):
         item["price"] = price[0].strip() + unit[0]
 
         # 租房面积
+        # /html/body/div[4]/div[2]/div[2]/div[2]/p[1]
         area = sel.xpath("//div[@class='zf-room']/p[@class='lf'][1]/text()")
         item['area'] = area[0]
 

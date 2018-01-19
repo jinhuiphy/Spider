@@ -12,7 +12,7 @@ class ShenZhenSpider(Spider):
     # 切记去修改数据库的名字
     name="ShenZhenLouPan"
 
-    download_delay = 0.6
+    download_delay = 0.3
 
     allowed_domains=[]
 
@@ -23,8 +23,9 @@ class ShenZhenSpider(Spider):
     ]
 
     def parse(self, response):
+        """获取总页数对应的url"""
+
         sel = etree.HTML(response.text)
-        # sel = Selector(response)
         page_info = sel.xpath("//div[@class='page-box house-lst-page-box']/@page-data")[0]
         page_info = json.loads(page_info)
         total_page = page_info.get("totalPage")
@@ -35,6 +36,8 @@ class ShenZhenSpider(Spider):
             yield Request(url, callback=self.parse_loupan)
 
     def parse_loupan(self, response):
+        """获取每一页相应楼盘对应的url"""
+
         sel = etree.HTML(response.text)
         loupan_list = sel.xpath("//div[@class='pic-panel']/a/@href")
         for loupan in loupan_list:
@@ -42,6 +45,8 @@ class ShenZhenSpider(Spider):
             yield Request(url, callback=self.parse_detail)
 
     def parse_detail(self, response):
+        """具体处理获取某一个楼盘的信息"""
+
         sel = etree.HTML(response.text)
         item = LianjialoupanItem()
 
@@ -59,10 +64,7 @@ class ShenZhenSpider(Spider):
 
         # 楼盘价格
         jiage = sel.xpath("//div[@class='box-left-top']/p[@class='jiage']/span/text()")
-        # item["price"] = jiage
         if "均价" in jiage:
-            # junjia = sel.xpath("//span[@class='junjia']/text()")
-            # yuan = sel.xpath("span[@class='yuan']/text()")
             item["price"] = jiage[1] + jiage[2]
         else:
             item["price"] = jiage[0]

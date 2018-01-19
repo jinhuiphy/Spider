@@ -8,18 +8,21 @@ from LianJiaLouPan.items import LianjialoupanItem
 import json
 from lxml import etree
 
-class ChangShaSpider(Spider):
-    name="ChangShaLouPan"
+class NanJingSpider(Spider):
+    # 切记去修改数据库的名字
+    name="NanJingLouPan"
 
     download_delay = 0.3
 
     allowed_domains=[]
 
-    base_url = "https://cs.fang.lianjia.com"
+    base_url = "https://nj.fang.lianjia.com"
 
     start_urls=[
-        'https://cs.fang.lianjia.com/loupan/pg1'
+        'https://nj.fang.lianjia.com/loupan/pg1/'
     ]
+
+    # count = 0
 
     def parse(self, response):
         """获取总页数对应的url"""
@@ -30,7 +33,7 @@ class ChangShaSpider(Spider):
         total_page = page_info.get("totalPage")
         print(total_page)
         for i in range(int(total_page)):
-            url = self.base_url + '/loupan/pg' + str(i+1)
+            url = self.base_url + '/loupan/pg' + str(i+1) + '/'
             print(url)
             yield Request(url, callback=self.parse_loupan, dont_filter=True)
 
@@ -40,12 +43,14 @@ class ChangShaSpider(Spider):
         sel = etree.HTML(response.text)
         loupan_list = sel.xpath("//div[@class='pic-panel']/a/@href")
         for loupan in loupan_list:
-            url = "https://cs.fang.lianjia.com" + loupan
+            url = self.base_url + loupan
             yield Request(url, callback=self.parse_detail, dont_filter=True)
 
     def parse_detail(self, response):
         """具体处理获取某一个楼盘的信息"""
 
+        # self.count += 1
+        # print("正在处理第%s个页面" % self.count)
         sel = etree.HTML(response.text)
         item = LianjialoupanItem()
 
@@ -63,10 +68,7 @@ class ChangShaSpider(Spider):
 
         # 楼盘价格
         jiage = sel.xpath("//div[@class='box-left-top']/p[@class='jiage']/span/text()")
-        # item["price"] = jiage
         if "均价" in jiage:
-            # junjia = sel.xpath("//span[@class='junjia']/text()")
-            # yuan = sel.xpath("span[@class='yuan']/text()")
             item["price"] = jiage[1] + jiage[2]
         else:
             item["price"] = jiage[0]
@@ -90,4 +92,3 @@ class ChangShaSpider(Spider):
             print("Error:", e)
 
         yield item
-
