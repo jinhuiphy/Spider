@@ -33,7 +33,7 @@ class ShenZhenSpider(Spider):
         for i in range(int(total_page)):
             url = self.base_url + '/loupan/pg' + str(i+1)
             print(url)
-            yield Request(url, callback=self.parse_loupan)
+            yield Request(url, callback=self.parse_loupan, dont_filter=True)
 
     def parse_loupan(self, response):
         """获取每一页相应楼盘对应的url"""
@@ -42,7 +42,7 @@ class ShenZhenSpider(Spider):
         loupan_list = sel.xpath("//div[@class='pic-panel']/a/@href")
         for loupan in loupan_list:
             url = self.base_url + loupan
-            yield Request(url, callback=self.parse_detail)
+            yield Request(url, callback=self.parse_detail, dont_filter=True)
 
     def parse_detail(self, response):
         """具体处理获取某一个楼盘的信息"""
