@@ -22,6 +22,7 @@ def saveData(db, path, city):
             lng, lat = getLocation(address)
             wa.append([loupan['name'], loupan['wuye'], loupan['price'], loupan['where'], lng, lat, loupan['state'], loupan['url']])
 
+    print("正在保存，请稍后")
     wb.save(path)
 
 def getLocation(city):
@@ -34,7 +35,7 @@ def getLocation(city):
     city = city.split(" ")[0]       # 去除空格后面的内容
     print(city)
 
-    ak = '你自己的ak值'     # 你的百度API的ak值
+    ak = '你的百度API的ak值'     # 你的百度API的ak值
     url = 'http://api.map.baidu.com/geocoder/v2/?address=' + city + '&output=json&ak=' + ak + '&callback=showLocation'
     # print(url)
     url = quote(url, safe = string.printable)
@@ -60,8 +61,8 @@ def getLocation(city):
 
 
 def main():
-    city = 'NanJing'        # 用于匹配相应的数据库
-    city_china = '南京'       # 方便百度API调用
+    city = 'ChongQing'        # 用于匹配相应的数据库
+    city_china = '重庆'       # 方便百度API调用
     dbClient = pymongo.MongoClient(host='localhost', port=27017)
     LianJia = dbClient['LianJia']
     LouPan = LianJia[city + 'LouPan']

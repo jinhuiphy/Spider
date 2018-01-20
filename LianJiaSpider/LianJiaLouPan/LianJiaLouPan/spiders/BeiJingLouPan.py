@@ -12,7 +12,7 @@ class BeiJingSpider(Spider):
     # 切记去修改数据库的名字
     name="BeiJingLouPan"
 
-    download_delay = 0.6
+    download_delay = 0.3
 
     allowed_domains=[]
 
