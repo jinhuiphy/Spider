@@ -1,9 +1,6 @@
 import requests
 from lxml import etree
 
-
-
-
 def station(url):
     stations=[] #以列表的形式存储公交站点名称
     url0=url #线路具体站点的url
