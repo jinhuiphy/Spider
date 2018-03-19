@@ -7,7 +7,7 @@ data.py获取WebMercator坐标
 
 爬取图吧网址：http://bus.mapbar.com/nanjing/xianlu  
 
-GPS-84转webmercator:https://github.com/lvhaidong/TrainTicket
+GPS-84转换webmercator:https://github.com/lvhaidong/TrainTicket
 
 坐标系之间的装换：https://github.com/wandergis/coordTransform_py
 
