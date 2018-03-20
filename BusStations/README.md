@@ -3,6 +3,9 @@
 
 StationsName.py：获取南京所有公交站点的名称
 
+GetStation.py：获取百度矩形内公交站点的名称
+
+
 data.py：获取WebMercator坐标
 
 [爬取图吧地址](http://bus.mapbar.com/nanjing/xianlu)
