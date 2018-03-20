@@ -80,7 +80,7 @@ def gcj02_to_wgs84(lng, lat):
 def webmercator(lng,lat):#GPS-84转def webmercator
     x=lng*20037508.34/180
     y=math.log(math.tan((90+lat)*math.pi/360))/(math.pi/180)
-    y=lat*20037508.34/180
+    y=y*20037508.34/180
     return[x,y]
 
 if __name__ == '__main__':
