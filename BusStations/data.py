@@ -104,4 +104,4 @@ if __name__ == '__main__':
         F.write(str(W[0])+'\t'+str(W[1])+'\n')#保存到WebMercator.txt
         i=i+1
         print('已经完成%d/%d'%(i,Lines))
-
+\
