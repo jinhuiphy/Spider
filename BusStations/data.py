@@ -12,7 +12,7 @@ ee = 0.00669342162296594323  # 偏心率平方
 def getlnglat(address):
     url = 'http://api.map.baidu.com/geocoder/v2/'
     output = 'json'
-    ak = '' #这里填写百度地图密钥
+    ak = 'usvmj8KfNKGNi797d7j8itn4Y0sF1z6y' #这里填写百度地图密钥
     add = quote(address) #由于本文城市变量为中文，为防止乱码，先用quote进行编码
     uri = url + '?' + 'address=' + add  + '&output=' + output + '&ak=' + ak
     req = urlopen(uri)
@@ -89,12 +89,12 @@ if __name__ == '__main__':
     F0=open('GCJ-02.txt','w',encoding='utf-8')
     G=open('WGS-84.txt','w',encoding='utf-8')
     F=open('WebMercator.txt','w',encoding='utf-8')
-    f=open('stations.txt','r',encoding='utf-8')
+    f=open('data0.txt','r',encoding='utf-8')
     lines=f.readlines()
     Lines=len(lines)
     for line in lines:
-        lng=getlnglat(line)['result']['location']['lng']
-        lat=getlnglat(line)['result']['location']['lat'] #得到百度api返回的经纬度坐标
+        lng,lat=[float(i) for i in line.split()]
+        print(lng,lat)
         f0.write(str(lng)+'\t'+str(lat)+'\n') #保存到BD-09.txt
         lng0=bd09_to_gcj02(lng,lat)
         F0.write(str(lng0[0])+'\t'+str(lng0[1])+'\n')#保存到GCJ-02.txt
