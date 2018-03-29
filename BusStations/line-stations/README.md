@@ -1,18 +1,13 @@
 
 # BusSations
 
-StationsName.py：获取南京所有公交站点的名称
+line.py：获取线路上下行的数据
 
-GetStation.py：获取百度矩形内公交站点的名称
+findstations.py：找到所需站点
 
 
-data.py：获取WebMercator坐标
+find.py：在线路中找到站点
 
-[爬取图吧地址](http://bus.mapbar.com/nanjing/xianlu)
+[爬取线路信息网址](http://nanjing.8684.cn/)
 
-[GPS-84转换webmercator](http://blog.csdn.net/giswens/article/details/9634261)
-
-[坐标系之间的转换](https://github.com/wandergis/coordTransform_py)
-
-[百度api申请接口](http://lbsyun.baidu.com)
 
